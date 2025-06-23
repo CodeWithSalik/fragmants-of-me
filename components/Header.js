@@ -61,7 +61,7 @@ export default function Header() {
             } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-[#fdf6e3] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
         >
           <Link href="/" className={linkStyle}>Home</Link>
-          <Link href="/archive" className={linkStyle}>Archive</Link>
+          {/* <Link href="/archive" className={linkStyle}>Archive</Link> */}
 
           {user && (
             <>

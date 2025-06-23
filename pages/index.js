@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import Link from "next/link";
-import { doc, getDoc } from "firebase/firestore";
 
 export default function Home() {
   const [entries, setEntries] = useState([]);
@@ -28,7 +35,10 @@ export default function Home() {
         orderBy("timestamp", "desc")
       );
       const snapshot = await getDocs(q);
-      const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const results = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setEntries(results);
       setLoading(false);
     };
@@ -42,15 +52,14 @@ export default function Home() {
     monologue: "badge-monologue",
   };
 
-
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-
       {quote && (
         <div className="mb-8 text-center italic text-lg sm:text-xl text-gray-700 font-serif px-4">
           “{quote}”
         </div>
       )}
+
       <h1 className="text-3xl font-bold text-amber-900 mb-6">Latest Fragments</h1>
 
       {loading ? (
@@ -67,11 +76,11 @@ export default function Home() {
                     {entry.title}
                   </h2>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"}`}
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"
+                      }`}
                   >
                     {entry?.type?.charAt(0).toUpperCase() + entry?.type?.slice(1) || "Unknown"}
                   </span>
-
                 </div>
                 <p className="text-sm text-gray-500 mb-1">
                   {entry.timestamp?.toDate().toLocaleDateString()}

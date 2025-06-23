@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import Layout from "@/components/Layout";
 import { pingBackend } from "@/lib/pingBackend";
 
+
 export default function App({ Component, pageProps }) {
   const router = useRouter();
 
