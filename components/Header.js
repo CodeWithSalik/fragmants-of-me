@@ -19,7 +19,6 @@ export default function Header() {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  // Auto-close mobile menu on route change
   useEffect(() => {
     const handleRouteChange = () => setMenuOpen(false);
     router.events.on("routeChangeStart", handleRouteChange);
@@ -31,13 +30,22 @@ export default function Header() {
 
   return (
     <header className="bg-[#fdf6e3] border-b border-amber-light shadow-md sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2">
+      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between sm:justify-start relative">
+        
+        {/* Logo (left) */}
+        <Link href="/" className="flex items-center gap-2 z-20 sm:mr-6">
           <img src="/logo.png" alt="Fragments of Me" className="h-8 sm:h-10" />
         </Link>
 
-        {/* Hamburger toggle (Mobile only) */}
-        <div className="sm:hidden">
+        {/* Center Title (mobile only) */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 sm:hidden">
+          <span className="text-base italic text-amber-dark font-semibold">
+            Fragments of Me
+          </span>
+        </div>
+
+        {/* Hamburger (right, mobile only) */}
+        <div className="sm:hidden z-20">
           <button
             onClick={toggleMenu}
             aria-label="Toggle Menu"
@@ -47,29 +55,19 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Navigation */}
+        {/* Full Nav (dropdown on mobile) */}
         <nav
           className={`${menuOpen ? "max-h-[500px]" : "max-h-0"
             } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-[#fdf6e3] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
         >
-          <Link href="/" className={linkStyle}>
-            Home
-          </Link>
-          <Link href="/archive" className={linkStyle}>
-            Archive
-          </Link>
+          <Link href="/" className={linkStyle}>Home</Link>
+          <Link href="/archive" className={linkStyle}>Archive</Link>
 
           {user && (
             <>
-              <Link href="/poems" className={linkStyle}>
-                Poems
-              </Link>
-              <Link href="/diary" className={linkStyle}>
-                Diary
-              </Link>
-              <Link href="/monologues" className={linkStyle}>
-                Monologues
-              </Link>
+              <Link href="/poems" className={linkStyle}>Poems</Link>
+              <Link href="/diary" className={linkStyle}>Diary</Link>
+              <Link href="/monologues" className={linkStyle}>Monologues</Link>
             </>
           )}
 
@@ -81,15 +79,9 @@ export default function Header() {
 
           {isAdmin && (
             <>
-              <Link href="/write" className={linkStyle}>
-                Write
-              </Link>
-              <Link href="/private" className={linkStyle}>
-                Private
-              </Link>
-              <Link href="/quote" className={linkStyle}>
-                Edit Quote
-              </Link>
+              <Link href="/write" className={linkStyle}>Write</Link>
+              <Link href="/private" className={linkStyle}>Private</Link>
+              <Link href="/quote" className={linkStyle}>Edit Quote</Link>
             </>
           )}
 
