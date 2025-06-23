@@ -2,23 +2,10 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import Link from "next/link";
-import { doc, getDoc } from "firebase/firestore";
 
-export default function Home() {
+export default function Archive() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quote, setQuote] = useState("");
-
-  useEffect(() => {
-    const fetchQuote = async () => {
-      const ref = doc(db, "settings", "quoteOfTheDay");
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        setQuote(snap.data().text);
-      }
-    };
-    fetchQuote();
-  }, []);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -37,24 +24,17 @@ export default function Home() {
   }, []);
 
   const badgeColors = {
-    poem: "badge-poem",
-    diary: "badge-diary",
-    monologue: "badge-monologue",
-  };
-
+  poem: "badge-poem",
+  diary: "badge-diary",
+  monologue: "badge-monologue",
+};
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-
-      {quote && (
-        <div className="mb-8 text-center italic text-lg sm:text-xl text-gray-700 font-serif px-4">
-          “{quote}”
-        </div>
-      )}
-      <h1 className="text-3xl font-bold text-amber-900 mb-6">Latest Fragments</h1>
+      <h1 className="text-3xl font-bold text-amber-900 mb-6">Archive</h1>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading entries...</p>
+        <p className="text-center text-gray-500">Loading...</p>
       ) : entries.length === 0 ? (
         <p className="text-center text-gray-500">No entries yet.</p>
       ) : (
@@ -66,12 +46,9 @@ export default function Home() {
                   <h2 className="text-xl font-semibold text-amber-900 group-hover:underline">
                     {entry.title}
                   </h2>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"}`}
-                  >
-                    {entry?.type?.charAt(0).toUpperCase() + entry?.type?.slice(1) || "Unknown"}
-                  </span>
-
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"}`}>
+              {entry.type?.charAt(0).toUpperCase() + entry.type?.slice(1) || "Unknown"}
+            </span>
                 </div>
                 <p className="text-sm text-gray-500 mb-1">
                   {entry.timestamp?.toDate().toLocaleDateString()}
