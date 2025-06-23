@@ -17,7 +17,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success("✅ Logged in successfully!");
-      router.push("/poems");
+      router.push("/");
     } catch (err) {
       toast.error("❌ " + err.message);
     } finally {
