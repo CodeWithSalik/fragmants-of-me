@@ -44,7 +44,7 @@ export default function Register() {
             });
 
             toast.success("✅ Account created! Welcome email sent.");
-            router.push("/poems");
+            router.push("/");
         } catch (err) {
             console.error("Registration error:", err);
             toast.error("❌ " + err.message);
