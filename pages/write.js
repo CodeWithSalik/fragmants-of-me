@@ -69,7 +69,7 @@ export default function WritePage() {
         </p>
       </div>
     `,
-    testMode: true,
+    testMode: false,
   }),
 });
 
