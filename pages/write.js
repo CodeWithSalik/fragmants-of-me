@@ -5,6 +5,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import toast from "react-hot-toast";
 
 export default function WritePage() {
   const [user, setUser] = useState(null);
@@ -44,18 +45,37 @@ export default function WritePage() {
   });
 
   // Send email to all registered users
-  await fetch("http://127.0.0.1:4400/send-broadcast", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
-      message: `${content.slice(0, 300)}...\n\nVisit fragmants-of-me.vercel.app to read more.`,
-    }),
-  });
+  await fetch("https://newyear-backend.onrender.com/send-broadcast", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
+    message: `
+      <div style="font-family: 'Georgia', serif; color: #3c2f2f; background-color: #fefcf9; padding: 20px;">
+        <h2 style="color: #a97142; margin-bottom: 10px;">📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}</h2>
+        <p style="font-size: 16px; line-height: 1.6;">
+          ${content.slice(0, 300)}...
+        </p>
+        <p style="margin-top: 30px;">
+          ➡️ <a href="https://fragments-of-me.vercel.app" target="_blank" style="color: #a97142; text-decoration: underline;">
+            Read the full piece on Fragments of Me
+          </a>
+        </p>
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid #ddd;" />
+        <p style="font-size: 14px; color: #7a6f67;">
+          You’re receiving this because you're part of the <strong>Fragments of Me</strong> circle. Thank you for being here.
+        </p>
+      </div>
+    `,
+    testMode: true,
+  }),
+});
 
-  router.push("/");
+router.push("/");
+toast.success("✅ Entry Posted Successfully!");
+
 };
 
   if (loading) return <p className="p-10">Verifying...</p>;
