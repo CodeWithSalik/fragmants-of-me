@@ -69,12 +69,11 @@ export default function WritePage() {
         </p>
       </div>
     `,
-    testMode: false,
   }),
 });
 
 router.push("/");
-toast.success("✅ Entry Posted Successfully!");
+toast.success("✅ Entry Upload Successfully!");
 
 };
 
