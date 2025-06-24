@@ -44,14 +44,14 @@ export default function WritePage() {
   });
 
   // Send email to all registered users
-  await fetch("https://newyear-backend.onrender.com/send-broadcast", {
+  await fetch("http://127.0.0.1:4400/send-broadcast", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
-      message: `${content.slice(0, 300)}...\n\nVisit Fragments of Me to read more.`,
+      message: `${content.slice(0, 300)}...\n\nVisit fragmants-of-me.vercel.app to read more.`,
     }),
   });
 
