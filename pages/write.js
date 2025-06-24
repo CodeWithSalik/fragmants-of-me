@@ -31,21 +31,39 @@ export default function WritePage() {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return alert("All fields required!");
+  e.preventDefault();
+  if (!title.trim() || !content.trim()) return alert("All fields required!");
 
-    await addDoc(collection(db, "entries"), {
-      title,
-      content,
-      type,
-      isPrivate,
-      timestamp: selectedDate,
+  // Step 1: Save entry to Firestore
+  await addDoc(collection(db, "entries"), {
+    title,
+    content,
+    type,
+    isPrivate,
+    timestamp: selectedDate,
+    uid: user.uid,
+  });
 
-      uid: user.uid,
+  // Step 2: Notify users via email
+  try {
+    await fetch("https://newyear-backend.onrender.com/send-broadcast", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        subject: `New ${type} posted: ${title}`,
+        message: `A new ${type} titled "${title}" has been published on Fragments of Me.\n\nLogin to read: https://fragments-of-me.vercel.app`,
+      }),
     });
+  } catch (err) {
+    console.error("Email broadcast failed", err);
+  }
 
-    router.push("/");
-  };
+  // Step 3: Redirect
+  router.push("/");
+};
+
 
   if (loading) return <p className="p-10">Verifying...</p>;
 
