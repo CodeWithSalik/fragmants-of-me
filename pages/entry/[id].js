@@ -70,19 +70,25 @@ export default function EntryPage() {
 
   const toggleLike = async () => {
     if (!user || !entry) return;
-
+  
     const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
+  
     if (hasLiked) {
       await deleteDoc(likeRef);
       setHasLiked(false);
       setLikesCount(prev => prev - 1);
     } else {
-      await setDoc(likeRef, { createdAt: new Date() });
+      await setDoc(likeRef, {
+        createdAt: new Date(),
+        name: user.displayName || "Anonymous",
+        email: user.email || "",
+        uid: user.uid,
+      });
       setHasLiked(true);
       setLikesCount(prev => prev + 1);
     }
   };
-
+  
   if (!entry) return <div className="p-6">Loading...</div>;
 
   return (
