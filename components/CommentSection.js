@@ -119,10 +119,8 @@ export default function CommentSection({ entryId }) {
           authorId: user.uid,
         }),
       });
-      console.log("RESPONSE:", await res.json());
-
-
       const data = await res.json();
+console.log("RESPONSE:", data);
       if (data.success) toast.success("↩️ Reply added & email sent");
       else toast.error("⚠️ Reply saved, email not sent");
     }
