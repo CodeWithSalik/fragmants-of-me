@@ -15,11 +15,20 @@ export default function EditEntry() {
   const [user, loading] = useAuthState(auth);
 
   const [entry, setEntry] = useState(null);
-  const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [type, setType] = useState("diary");
   const [timestamp, setTimestamp] = useState(new Date());
+  const [authorName, setAuthorName] = useState("");
+
+  const AUTHOR_OPTIONS = [
+    "Salik Pirzada",
+    "Anonymous",
+    "My Inner Self",
+    "Fragments",
+    "Kashmir Stag",
+    "Abdul Kareem"
+  ];
 
   useEffect(() => {
     if (!id || !user || user.uid !== ADMIN_UID) return;
@@ -32,11 +41,13 @@ export default function EditEntry() {
         setTitle(data.title || "");
         setContent(data.content || "");
         setType(data.type || "diary");
+        setAuthorName(data.authorName || "");
         setTimestamp(data.timestamp?.toDate() || new Date());
       }
     };
     fetchData();
   }, [id, user]);
+
   const makePrivate = async () => {
     try {
       const ref = doc(db, "entries", id);
@@ -50,9 +61,11 @@ export default function EditEntry() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) return toast.error("Title/content empty");
+    if (!title.trim() || !content.trim() || !authorName) {
+      return toast.error("Please fill in all fields, including author.");
+    }
     const ref = doc(db, "entries", id);
-    await updateDoc(ref, { title, content, type, timestamp });
+    await updateDoc(ref, { title, content, type, timestamp, authorName });
     toast.success("✅ Entry updated!");
     router.push(`/entry/${id}`);
   };
@@ -65,14 +78,6 @@ export default function EditEntry() {
     <div className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 text-amber-dark">Edit Entry</h1>
 
-      {/* ✅ Styled Message */}
-      {message && (
-        <div className="mb-6 px-4 py-2 rounded bg-yellow-100 border border-yellow-400 text-yellow-800 text-sm">
-          {message}
-        </div>
-      )}
-
-      {/* 🔒 Show only if not already private */}
       {!entry?.isPrivate && (
         <button
           className="mb-6 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
@@ -101,17 +106,36 @@ export default function EditEntry() {
           />
         </div>
 
-        <div>
-          <label className="block mb-1 font-medium">Type</label>
-          <select
-            className="w-full p-2 border rounded"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-          >
-            <option value="diary">Diary</option>
-            <option value="poem">Poem</option>
-            <option value="monologue">Monologue</option>
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 font-medium">Type</label>
+            <select
+              className="w-full p-2 border rounded"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="diary">Diary</option>
+              <option value="poem">Poem</option>
+              <option value="monologue">Monologue</option>
+            </select>
+          </div>
+
+          {/* 🔽 Author Name Dropdown */}
+          <div>
+            <label className="block mb-1 font-medium">Author</label>
+            <select
+              className="w-full p-2 border rounded"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+            >
+              <option value="">Select author</option>
+              {AUTHOR_OPTIONS.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>

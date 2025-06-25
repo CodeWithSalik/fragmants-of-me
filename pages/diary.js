@@ -50,6 +50,8 @@ export default function Diary() {
                     Diary
                   </span>
                 </div>
+                <p className="text-sm text-gray-600">✍️ by {entry.authorName}</p>
+
                 <p className="text-sm text-gray-500 mb-1">
                   {entry.timestamp?.toDate().toLocaleDateString()}
                 </p>

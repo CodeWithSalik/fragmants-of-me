@@ -12,11 +12,14 @@ export default function WritePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [type, setType] = useState("poem");
+  const [authorName, setAuthorName] = useState(""); // 🆕
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const router = useRouter();
+
+  const AUTHOR_OPTIONS = ["Salik Pirzada", "Anonymous","Abdul Kareem", "My Inner Self", "Someone Else"]; // ✏️ Customize as needed
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -32,55 +35,47 @@ export default function WritePage() {
   }, []);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!title.trim() || !content.trim()) return alert("All fields required!");
+    e.preventDefault();
+    if (!title.trim() || !content.trim() || !authorName) {
+      return alert("All fields including author must be filled!");
+    }
 
-  await addDoc(collection(db, "entries"), {
-    title,
-    content,
-    type,
-    isPrivate,
-    timestamp: selectedDate,
-    uid: user.uid,
-  });
+    await addDoc(collection(db, "entries"), {
+      title: title.trim(),
+      content: content.trim(),
+      type,
+      isPrivate,
+      timestamp: selectedDate,
+      uid: user.uid,
+      authorName, // 🆕 saved to Firestore
+    });
 
-  // Send email to all registered users
-  await fetch("https://newyear-backend.onrender.com/send-broadcast", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
-    message: `
-      <div style="font-family: 'Georgia', serif; color: #3c2f2f; background-color: #fefcf9; padding: 20px;">
-        <h2 style="color: #a97142; margin-bottom: 10px;">📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}</h2>
-        <p style="font-size: 16px; line-height: 1.6;">
-          ${content.slice(0, 300)}...
-        </p>
-        <p style="margin-top: 30px;">
-          ➡️ <a href="https://fragments-of-me.vercel.app" target="_blank" style="color: #a97142; text-decoration: underline;">
-            Read the full piece on Fragments of Me
-          </a>
-        </p>
-        <hr style="margin: 40px 0; border: none; border-top: 1px solid #ddd;" />
-        <p style="font-size: 14px; color: #7a6f67;">
-          You’re receiving this because you're part of the <strong>Fragments of Me</strong> circle. Thank you for being here.
-        </p>
-      </div>
-    `,
-  }),
-});
+    // ✅ Send broadcast
+    await fetch("https://newyear-backend.onrender.com/send-broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
+        message: `
+          <div style="font-family: 'Georgia', serif; color: #3c2f2f; background-color: #fefcf9; padding: 20px;">
+            <h2 style="color: #a97142;">📢 New ${type}: ${title}</h2>
+            <p><em>by ${authorName}</em></p>
+            <p>${content.slice(0, 300)}...</p>
+            <p><a href="https://fragmants-of-me.vercel.app" target="_blank" style="color:#a97142;">Read full piece</a></p>
+            <hr/>
+            <p style="color: #888; font-size: 13px;">You are receiving this email from Fragments of Me.</p>
+          </div>
+        `,
+      }),
+    });
 
-router.push("/");
-toast.success("✅ Entry Upload Successfully!");
-
-};
+    router.push("/");
+    toast.success("✅ Entry Uploaded Successfully!");
+  };
 
   if (loading) return <p className="p-10">Verifying...</p>;
 
   return (
-
     <div className="min-h-screen bg-parchment px-6 py-10 text-ink">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-amber-dark mb-6">📝 Write Entry</h1>
@@ -98,7 +93,7 @@ toast.success("✅ Entry Upload Successfully!");
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -108,6 +103,21 @@ toast.success("✅ Entry Upload Successfully!");
               <option value="diary">Diary</option>
               <option value="monologue">Monologue</option>
             </select>
+
+            {/* 🆕 Author dropdown */}
+            <select
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              className="border border-amber-dark p-2 rounded"
+            >
+              <option value="">Select Author</option>
+              {AUTHOR_OPTIONS.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -117,8 +127,11 @@ toast.success("✅ Entry Upload Successfully!");
               <span className="text-sm">Private</span>
             </label>
           </div>
+
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Entry Date</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Entry Date
+            </label>
             <DatePicker
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
@@ -126,13 +139,13 @@ toast.success("✅ Entry Upload Successfully!");
               className="border p-2 rounded w-full"
             />
           </div>
+
           <button
             type="submit"
             className="px-6 py-2 bg-amber text-white rounded hover:bg-amber-dark transition"
           >
             Save Entry
           </button>
-
         </form>
       </div>
     </div>

@@ -82,6 +82,8 @@ export default function Home() {
                     {entry?.type?.charAt(0).toUpperCase() + entry?.type?.slice(1) || "Unknown"}
                   </span>
                 </div>
+                <p className="text-sm text-gray-600">✍️ by {entry.authorName}</p>
+
                 <p className="text-sm text-gray-500 mb-1">
                   {entry.timestamp?.toDate().toLocaleDateString()}
                 </p>

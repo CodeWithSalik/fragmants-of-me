@@ -21,28 +21,54 @@ export default function CommentSection({ entryId }) {
   const [comments, setComments] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [replyBoxes, setReplyBoxes] = useState({});
+  const [replies, setReplies] = useState({});
   const [user] = useAuthState(auth);
 
+  // Fetch Comments and Replies
   useEffect(() => {
-    const q = query(
-      collection(db, "entries", entryId, "comments"),
-      orderBy("timestamp", "desc")
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setComments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsubscribeReplies = {};
+    const q = query(collection(db, "entries", entryId, "comments"), orderBy("timestamp", "desc"));
+
+    const unsubscribeComments = onSnapshot(q, (snapshot) => {
+      const loadedComments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setComments(loadedComments);
+
+      loadedComments.forEach((comment) => {
+        const replyRef = collection(db, "entries", entryId, "comments", comment.id, "replies");
+
+        if (unsubscribeReplies[comment.id]) unsubscribeReplies[comment.id]();
+        unsubscribeReplies[comment.id] = onSnapshot(
+          query(replyRef, orderBy("timestamp", "asc")),
+          (replySnap) => {
+            setReplies((prev) => ({
+              ...prev,
+              [comment.id]: replySnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+            }));
+          }
+        );
+      });
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeComments();
+      Object.values(unsubscribeReplies).forEach((unsub) => unsub && unsub());
+    };
   }, [entryId]);
 
+  // Add new comment
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!comment.trim() || !user) return;
+
     await addDoc(collection(db, "entries", entryId, "comments"), {
-      content: comment,
+      content: comment.trim(),
       authorId: user.uid,
       authorName: user.displayName || "Anonymous",
+      authorEmail: user.email || "", // Needed for email replies
       timestamp: serverTimestamp(),
     });
+
     setComment("");
     toast.success("💬 Comment posted!");
   };
@@ -57,12 +83,61 @@ export default function CommentSection({ entryId }) {
     const ref = doc(db, "entries", entryId, "comments", commentId);
     await updateDoc(ref, {
       content: editText,
-      timestamp: serverTimestamp(), // optional: update timestamp
+      timestamp: serverTimestamp(),
     });
     toast.success("✏️ Comment updated");
     setEditingId(null);
     setEditText("");
   };
+
+  // ✅ Only backend handles adding reply + email
+  const handleReplySubmit = async (commentId, replyText) => {
+  try {
+    if (!replyText.trim() || !user) return;
+
+    const originalComment = comments.find((c) => c.id === commentId);
+    const isReplyToSelf = originalComment?.authorId === user.uid;
+
+    if (isReplyToSelf) {
+      const replyRef = collection(db, "entries", entryId, "comments", commentId, "replies");
+      await addDoc(replyRef, {
+        content: replyText.trim(),
+        authorId: user.uid,
+        authorName: user.displayName || "Anonymous",
+        timestamp: serverTimestamp(),
+      });
+      toast.success("↩️ Reply added");
+    } else {
+      const res = await fetch("https://newyear-backend.onrender.com/reply-to-comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryId,
+          commentId,
+          replyContent: replyText.trim(),
+          replierName: user.displayName || "Anonymous",
+          authorId: user.uid,
+        }),
+      });
+      console.log("RESPONSE:", await res.json());
+
+
+      const data = await res.json();
+      if (data.success) toast.success("↩️ Reply added & email sent");
+      else toast.error("⚠️ Reply saved, email not sent");
+    }
+
+    setReplyBoxes((prev) => {
+      const updated = { ...prev };
+      delete updated[commentId]; // cleanly removes the box after success
+      return updated;
+    });
+  } catch (err) {
+    console.error("Reply error:", err);
+    toast.error("⚠️ Failed to post reply");
+  }
+};
+
 
   return (
     <div className="mt-10">
@@ -88,12 +163,9 @@ export default function CommentSection({ entryId }) {
         <p className="text-sm text-gray-600">Login to comment.</p>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {comments.map((c) => (
-          <div
-            key={c.id}
-            className="border-l-4 pl-4 border-amber bg-white p-3 rounded shadow-sm relative"
-          >
+          <div key={c.id} className="border-l-4 pl-4 border-amber bg-white p-3 rounded shadow-sm">
             {editingId === c.id ? (
               <>
                 <textarea
@@ -102,10 +174,7 @@ export default function CommentSection({ entryId }) {
                   className="w-full p-2 border rounded mb-2"
                 />
                 <div className="flex gap-2 text-sm">
-                  <button
-                    onClick={() => handleEdit(c.id)}
-                    className="text-green-600 hover:underline"
-                  >
+                  <button onClick={() => handleEdit(c.id)} className="text-green-600 hover:underline">
                     Save
                   </button>
                   <button
@@ -126,24 +195,72 @@ export default function CommentSection({ entryId }) {
                   {c.authorName} • {c.timestamp?.toDate().toLocaleString()}
                 </div>
 
-                {(user?.uid === c.authorId || user?.uid === ADMIN_UID) && (
-                  <div className="text-xs text-right space-x-2 mt-1">
-                    {user?.uid === c.authorId && (
+                <div className="text-xs space-x-3 mt-1">
+                  <button
+                    onClick={() =>
+                      setReplyBoxes((prev) => ({
+                        ...prev,
+                        [c.id]: prev[c.id] ? "" : "",
+                      }))
+                    }
+                    className="text-blue-600 hover:underline"
+                  >
+                    Reply
+                  </button>
+                  {(user?.uid === c.authorId || user?.uid === ADMIN_UID) && (
+                    <>
+                      {user?.uid === c.authorId && (
+                        <button
+                          onClick={() => {
+                            setEditingId(c.id);
+                            setEditText(c.content);
+                          }}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
-                        onClick={() => {
-                          setEditingId(c.id);
-                          setEditText(c.content);
-                        }}
-                        className="text-blue-600 hover:underline"
+                        onClick={() => handleDelete(c.id)}
+                        className="text-red-600 hover:underline"
                       >
-                        Edit
+                        Delete
                       </button>
-                    )}
+                    </>
+                  )}
+                </div>
+
+                {/* Replies */}
+                {replies[c.id]?.length > 0 && (
+                  <div className="mt-2 border-l-2 pl-3 border-gray-200 space-y-2">
+                    {replies[c.id].map((r) => (
+                      <div key={r.id} className="bg-gray-50 p-2 rounded text-sm">
+                        <p>{r.content}</p>
+                        <div className="text-xs text-gray-500">
+                          {r.authorName} • {r.timestamp?.toDate().toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Reply box */}
+                {replyBoxes[c.id] !== undefined && (
+                  <div className="mt-2">
+                    <textarea
+                      className="w-full p-2 border rounded text-sm"
+                      rows="2"
+                      value={replyBoxes[c.id]}
+                      onChange={(e) =>
+                        setReplyBoxes((prev) => ({ ...prev, [c.id]: e.target.value }))
+                      }
+                      placeholder="Write a reply..."
+                    />
                     <button
-                      onClick={() => handleDelete(c.id)}
-                      className="text-red-600 hover:underline"
+                      onClick={() => handleReplySubmit(c.id, replyBoxes[c.id])}
+                      className="mt-1 px-3 py-1 bg-amber text-white text-sm rounded hover:bg-amber-dark"
                     >
-                      Delete
+                      Post Reply
                     </button>
                   </div>
                 )}
