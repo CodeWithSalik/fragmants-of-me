@@ -6,6 +6,8 @@ import { useRouter } from "next/router";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import toast from "react-hot-toast";
+import { checkIfAdmin } from "@/lib/checkAdmin";
+
 
 export default function WritePage() {
   const [user, setUser] = useState(null);
@@ -22,17 +24,24 @@ export default function WritePage() {
   const AUTHOR_OPTIONS = ["Salik Pirzada", "Anonymous","Abdul Kareem", "My Inner Self", "Someone Else"]; // ✏️ Customize as needed
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      if (!u || u.uid !== ADMIN_UID) {
-        router.push("/");
-      } else {
-        setUser(u);
-        setLoading(false);
-      }
-    });
+  const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    if (!u) {
+      router.push("/");
+      return;
+    }
 
-    return () => unsubscribe();
-  }, []);
+    const isAdmin = await checkIfAdmin(u.uid);
+    if (!isAdmin) {
+      router.push("/");
+      return;
+    }
+
+    setUser(u);
+    setLoading(false);
+  });
+
+  return () => unsubscribe();
+}, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

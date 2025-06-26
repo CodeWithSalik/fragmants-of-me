@@ -13,20 +13,25 @@ import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import CommentSection from "@/components/CommentSection";
 import toast from "react-hot-toast";
-
-
-const ADMIN_UID = "SIpfZSIJM5RKrvLahp7I4DLwiE93";
+import { checkIfAdmin } from "@/lib/checkAdmin";
 
 export default function EntryPage() {
   const router = useRouter();
   const { id } = router.query;
   const [entry, setEntry] = useState(null);
   const [user] = useAuthState(auth);
-  const isAdmin = user?.uid === ADMIN_UID;
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
-  
+
+  useEffect(() => {
+    if (user?.uid) {
+      checkIfAdmin(user.uid).then(setIsAdmin);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!id) return;
@@ -54,7 +59,7 @@ export default function EntryPage() {
   const handleDelete = async () => {
     if (confirm("Delete this entry?")) {
       await deleteDoc(doc(db, "entries", id));
-    toast.error("Entry Deleted!");
+      toast.error("Entry Deleted!");
       router.push("/");
     }
   };
@@ -70,9 +75,9 @@ export default function EntryPage() {
 
   const toggleLike = async () => {
     if (!user || !entry) return;
-  
+
     const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
-  
+
     if (hasLiked) {
       await deleteDoc(likeRef);
       setHasLiked(false);
@@ -88,7 +93,7 @@ export default function EntryPage() {
       setLikesCount(prev => prev + 1);
     }
   };
-  
+
   if (!entry) return <div className="p-6">Loading...</div>;
 
   return (
@@ -99,7 +104,6 @@ export default function EntryPage() {
       <p className="text-sm text-gray-500 mb-6">
         {entry.timestamp?.toDate().toLocaleDateString()} — {entry.type}
       </p>
-      
 
       <div className="prose prose-amber mb-6 whitespace-pre-wrap">
         {entry.content}
@@ -115,8 +119,8 @@ export default function EntryPage() {
           </span>
         </div>
       )}
-      <CommentSection entryId={entry.id} />
 
+      <CommentSection entryId={entry.id} />
 
       {isAdmin && (
         <div className="flex gap-4 mt-6 text-sm">

@@ -13,8 +13,8 @@ import {
 import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "react-hot-toast";
+import { checkIfAdmin } from "@/lib/checkAdmin";
 
-const ADMIN_UID = "SIpfZSIJM5RKrvLahp7I4DLwiE93";
 
 export default function CommentSection({ entryId }) {
   const [comment, setComment] = useState("");
@@ -24,6 +24,16 @@ export default function CommentSection({ entryId }) {
   const [replyBoxes, setReplyBoxes] = useState({});
   const [replies, setReplies] = useState({});
   const [user] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+
+  useEffect(() => {
+    if (user?.uid) {
+      checkIfAdmin(user.uid).then(setIsAdmin);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   // Fetch Comments and Replies
   useEffect(() => {
@@ -92,49 +102,49 @@ export default function CommentSection({ entryId }) {
 
   // ✅ Only backend handles adding reply + email
   const handleReplySubmit = async (commentId, replyText) => {
-  try {
-    if (!replyText.trim() || !user) return;
+    try {
+      if (!replyText.trim() || !user) return;
 
-    const originalComment = comments.find((c) => c.id === commentId);
-    const isReplyToSelf = originalComment?.authorId === user.uid;
+      const originalComment = comments.find((c) => c.id === commentId);
+      const isReplyToSelf = originalComment?.authorId === user.uid;
 
-    if (isReplyToSelf) {
-      const replyRef = collection(db, "entries", entryId, "comments", commentId, "replies");
-      await addDoc(replyRef, {
-        content: replyText.trim(),
-        authorId: user.uid,
-        authorName: user.displayName || "Anonymous",
-        timestamp: serverTimestamp(),
-      });
-      toast.success("↩️ Reply added");
-    } else {
-      const res = await fetch("https://newyear-backend.onrender.com/reply-to-comment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          entryId,
-          commentId,
-          replyContent: replyText.trim(),
-          replierName: user.displayName || "Anonymous",
+      if (isReplyToSelf) {
+        const replyRef = collection(db, "entries", entryId, "comments", commentId, "replies");
+        await addDoc(replyRef, {
+          content: replyText.trim(),
           authorId: user.uid,
-        }),
-      });
-      const data = await res.json();
-console.log("RESPONSE:", data);
-      if (data.success) toast.success("↩️ Reply added & email sent");
-      else toast.error("⚠️ Reply saved, email not sent");
-    }
+          authorName: user.displayName || "Anonymous",
+          timestamp: serverTimestamp(),
+        });
+        toast.success("↩️ Reply added");
+      } else {
+        const res = await fetch("https://newyear-backend.onrender.com/reply-to-comment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            entryId,
+            commentId,
+            replyContent: replyText.trim(),
+            replierName: user.displayName || "Anonymous",
+            authorId: user.uid,
+          }),
+        });
+        const data = await res.json();
+        console.log("RESPONSE:", data);
+        if (data.success) toast.success("↩️ Reply added & email sent");
+        else toast.error("⚠️ Reply saved, email not sent");
+      }
 
-    setReplyBoxes((prev) => {
-      const updated = { ...prev };
-      delete updated[commentId]; // cleanly removes the box after success
-      return updated;
-    });
-  } catch (err) {
-    console.error("Reply error:", err);
-    toast.error("⚠️ Failed to post reply");
-  }
-};
+      setReplyBoxes((prev) => {
+        const updated = { ...prev };
+        delete updated[commentId]; // cleanly removes the box after success
+        return updated;
+      });
+    } catch (err) {
+      console.error("Reply error:", err);
+      toast.error("⚠️ Failed to post reply");
+    }
+  };
 
 
   return (
@@ -205,7 +215,7 @@ console.log("RESPONSE:", data);
                   >
                     Reply
                   </button>
-                  {(user?.uid === c.authorId || user?.uid === ADMIN_UID) && (
+                  {(user?.uid === c.authorId || isAdmin) && (
                     <>
                       {user?.uid === c.authorId && (
                         <button

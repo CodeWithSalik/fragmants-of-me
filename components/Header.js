@@ -5,12 +5,27 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import { FiUser, FiMenu, FiX } from "react-icons/fi";
 import { useState, useEffect } from "react";
+import { checkIfAdmin } from "@/lib/checkAdmin";
 
 export default function Header() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [user] = useAuthState(auth);
   const router = useRouter();
-  const isAdmin = user?.uid === "SIpfZSIJM5RKrvLahp7I4DLwiE93";
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (user?.uid) {
+      checkIfAdmin(user.uid).then((res) => {
+        if (active) setIsAdmin(res);
+      });
+    } else {
+      setIsAdmin(false);
+    }
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   const handleLogout = () => {
     auth.signOut();
@@ -31,20 +46,20 @@ export default function Header() {
   return (
     <header className="bg-[#fdf6e3] border-b border-amber-light shadow-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between sm:justify-start relative">
-        
-        {/* Logo (left) */}
+
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 z-20 sm:mr-6">
           <img src="/logo.png" alt="Fragments of Me" className="h-8 sm:h-10" />
         </Link>
 
-        {/* Center Title (mobile only) */}
+        {/* Title on mobile */}
         <div className="absolute left-1/2 transform -translate-x-1/2 sm:hidden">
           <span className="text-base italic text-amber-dark font-semibold">
             Fragments of Me
           </span>
         </div>
 
-        {/* Hamburger (right, mobile only) */}
+        {/* Hamburger toggle */}
         <div className="sm:hidden z-20">
           <button
             onClick={toggleMenu}
@@ -55,13 +70,12 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Full Nav (dropdown on mobile) */}
+        {/* Navigation */}
         <nav
           className={`${menuOpen ? "max-h-[500px]" : "max-h-0"
             } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-[#fdf6e3] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
         >
           <Link href="/" className={linkStyle}>Home</Link>
-          {/* <Link href="/archive" className={linkStyle}>Archive</Link> */}
 
           {user && (
             <>

@@ -6,13 +6,13 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import toast from "react-hot-toast";
-
-const ADMIN_UID = "SIpfZSIJM5RKrvLahp7I4DLwiE93";
+import { checkIfAdmin } from "@/lib/checkAdmin"; // ✅ make sure this returns true/false
 
 export default function EditEntry() {
   const router = useRouter();
   const { id } = router.query;
   const [user, loading] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [entry, setEntry] = useState(null);
   const [title, setTitle] = useState("");
@@ -30,8 +30,16 @@ export default function EditEntry() {
     "Abdul Kareem"
   ];
 
+  // ✅ Check admin status
   useEffect(() => {
-    if (!id || !user || user.uid !== ADMIN_UID) return;
+    if (user?.uid) {
+      checkIfAdmin(user.uid).then(setIsAdmin);
+    }
+  }, [user]);
+
+  // ✅ Fetch entry data if user is admin
+  useEffect(() => {
+    if (!id || !user || !isAdmin) return;
     const fetchData = async () => {
       const ref = doc(db, "entries", id);
       const snap = await getDoc(ref);
@@ -46,7 +54,7 @@ export default function EditEntry() {
       }
     };
     fetchData();
-  }, [id, user]);
+  }, [id, user, isAdmin]);
 
   const makePrivate = async () => {
     try {
@@ -71,7 +79,7 @@ export default function EditEntry() {
   };
 
   if (loading) return <div className="p-6">Loading...</div>;
-  if (!user || user.uid !== ADMIN_UID)
+  if (!user || !isAdmin)
     return <div className="p-6 text-red-600">Access Denied</div>;
 
   return (
@@ -120,7 +128,6 @@ export default function EditEntry() {
             </select>
           </div>
 
-          {/* 🔽 Author Name Dropdown */}
           <div>
             <label className="block mb-1 font-medium">Author</label>
             <select
