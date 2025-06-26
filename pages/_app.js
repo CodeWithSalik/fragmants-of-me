@@ -7,6 +7,8 @@ import { Toaster } from "react-hot-toast";
 import Layout from "@/components/Layout";
 import { pingBackend } from "@/lib/pingBackend";
 
+import { AuthProvider } from "@/lib/auth";
+
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -18,6 +20,7 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
+    <AuthProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -42,7 +45,7 @@ export default function App({ Component, pageProps }) {
             <Component {...pageProps} />
           </motion.main>
         </AnimatePresence>
-      </Layout>
+      </Layout></AuthProvider>
     </>
   );
 }

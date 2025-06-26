@@ -8,6 +8,8 @@ import {
   collection,
   getDocs,
   setDoc,
+  getCountFromServer,
+  serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -24,6 +26,7 @@ export default function EntryPage() {
 
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
+  const [viewsCount, setViewsCount] = useState(0); // 👁️ NEW
 
   useEffect(() => {
     if (user?.uid) {
@@ -55,6 +58,29 @@ export default function EntryPage() {
 
     fetchLikes();
   }, [entry, user]);
+
+  // 👁️ Record a view (one per user)
+  useEffect(() => {
+    const trackView = async () => {
+      if (!entry || !user) return;
+
+      const viewRef = doc(db, "entries", entry.id, "views", user.uid);
+      await setDoc(viewRef, { timestamp: serverTimestamp() }, { merge: true });
+    };
+    trackView();
+  }, [entry, user]);
+
+  // 👁️ Fetch views count
+  useEffect(() => {
+    const fetchViews = async () => {
+      if (!entry) return;
+
+      const viewsRef = collection(db, "entries", entry.id, "views");
+      const snapshot = await getCountFromServer(viewsRef);
+      setViewsCount(snapshot.data().count);
+    };
+    fetchViews();
+  }, [entry]);
 
   const handleDelete = async () => {
     if (confirm("Delete this entry?")) {
@@ -110,12 +136,16 @@ export default function EntryPage() {
       </div>
 
       {user && (
-        <div className="flex items-center gap-2 mt-6">
+        <div className="flex items-center gap-4 mt-6">
           <button onClick={toggleLike} className="text-2xl">
             {hasLiked ? "❤️" : "🤍"}
           </button>
           <span className="text-sm text-gray-700">
             {likesCount} {likesCount === 1 ? "like" : "likes"}
+          </span>
+
+          <span className="text-sm text-gray-700">
+            👁 {viewsCount} {viewsCount === 1 ? "view" : "views"}
           </span>
         </div>
       )}
