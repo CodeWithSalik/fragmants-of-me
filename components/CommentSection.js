@@ -73,10 +73,6 @@ export default function CommentSection({ entryId }) {
     if (!text.trim() || !user) return;
 
     try {
-      const commentRef = doc(db, "entries", entryId, "comments", commentId);
-      const snap = await getDoc(commentRef);
-      const commentData = snap.data();
-
       const res = await fetch("https://newyear-backend.onrender.com/reply-to-comment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,6 +86,7 @@ export default function CommentSection({ entryId }) {
       });
 
       const json = await res.json();
+      console.log("📬 Reply backend response:", json);
       if (!json.success) throw new Error(json.message);
 
       toast.success("↩️ Replied successfully!");
@@ -99,11 +96,10 @@ export default function CommentSection({ entryId }) {
         return updated;
       });
     } catch (err) {
-      console.error("Reply failed:", err);
+      console.error("❌ Reply failed:", err);
       toast.error("❌ Failed to reply");
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +109,7 @@ export default function CommentSection({ entryId }) {
       content: comment.trim(),
       authorId: user.uid,
       authorName: user.displayName || "Anonymous",
-      authorEmail: user.email || "",
+      authorEmail: user.email || "", // 🔒 Must not be empty
       timestamp: serverTimestamp(),
     });
     setComment("");
@@ -135,23 +131,6 @@ export default function CommentSection({ entryId }) {
     setEditText("");
     toast.success("✏️ Edited");
   };
-
-  // const handleReplySubmit = async (commentId, text) => {
-  //   if (!text.trim() || !user) return;
-  //   const ref = collection(db, "entries", entryId, "comments", commentId, "replies");
-  //   await addDoc(ref, {
-  //     content: text,
-  //     authorId: user.uid,
-  //     authorName: user.displayName || "Anonymous",
-  //     timestamp: serverTimestamp(),
-  //   });
-  //   toast.success("↩️ Replied");
-  //   setReplyBoxes((prev) => {
-  //     const updated = { ...prev };
-  //     delete updated[commentId];
-  //     return updated;
-  //   });
-  // };
 
   const pinComment = async (commentId) => {
     await updateDoc(doc(db, "entries", entryId), { pinnedCommentId: commentId });
@@ -190,12 +169,7 @@ export default function CommentSection({ entryId }) {
         </>
       ) : (
         <>
-          <p
-            className={`text-sm mb-1 whitespace-pre-wrap ${c.authorId === user?.uid && isAdmin
-              ? "text-amber-dark font-semibold"
-              : "text-gray-800 dark:text-[#fefae0]"
-              }`}
-          >
+          <p className="text-sm mb-1 whitespace-pre-wrap">
             {c.content}
           </p>
           <div className="text-xs text-gray-500 dark:text-[#b9b4a7]">
@@ -204,9 +178,7 @@ export default function CommentSection({ entryId }) {
 
           <div className="text-xs space-x-3 mt-1 text-gray-600 dark:text-[#d4cfc7]">
             <button
-              onClick={() =>
-                setReplyBoxes((prev) => ({ ...prev, [c.id]: prev[c.id] ? "" : "" }))
-              }
+              onClick={() => setReplyBoxes((prev) => ({ ...prev, [c.id]: prev[c.id] ? "" : "" }))}
               className="text-blue-600 hover:underline"
             >
               Reply
