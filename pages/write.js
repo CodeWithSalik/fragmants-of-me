@@ -74,14 +74,26 @@ export default function WritePage() {
       body: JSON.stringify({
         subject: `📢 New ${type.charAt(0).toUpperCase() + type.slice(1)}: ${title}`,
         message: `
-          <div style="font-family: 'Georgia', serif; color: #3c2f2f; background-color: #fefcf9; padding: 20px;">
-            <h2 style="color: #a97142;">📢 New ${type}: ${title}</h2>
-            <p><em>by ${authorName}</em></p>
-            <p>${content.slice(0, 300)}...</p>
-            <p><a href="https://fragments-of-me.vercel.app" target="_blank" style="color:#a97142;">Read full piece</a></p>
-            <hr/>
-            <p style="color: #888; font-size: 13px;">You are receiving this email from Fragments of Me.</p>
-          </div>
+          <div style="font-family: 'Georgia', serif; background-color: #fefcf9; color: #3c2f2f; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); max-width: 600px; margin: auto;">
+  <h2 style="color: #a97142; font-weight: 600; margin-bottom: 10px;">📝 A New ${type} Awaits: <span style="font-style: italic;">${title}</span></h2>
+  
+  <p style="margin: 0 0 8px;"><strong>by ${authorName}</strong></p>
+  
+  <p style="line-height: 1.6;">${content.slice(0, 300)}...</p>
+  
+  <p style="margin-top: 16px;">
+    <a href="https://fragmants-of-me.vercel.app" target="_blank" style="color: #a97142; text-decoration: none; font-weight: 500;">
+      ➤ Read the full piece
+    </a>
+  </p>
+  
+  <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;" />
+  
+  <p style="color: #777; font-size: 13px;">
+    This is an automated message from <strong>Fragmants of Me</strong> — a journal of thoughts, monologues, and memories.
+  </p>
+</div>
+
         `,
       }),
     });
