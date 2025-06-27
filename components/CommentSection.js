@@ -69,6 +69,42 @@ export default function CommentSection({ entryId }) {
     };
   }, [entryId]);
 
+  const handleReplySubmit = async (commentId, text) => {
+    if (!text.trim() || !user) return;
+
+    try {
+      const commentRef = doc(db, "entries", entryId, "comments", commentId);
+      const snap = await getDoc(commentRef);
+      const commentData = snap.data();
+
+      const res = await fetch("https://newyear-backend.onrender.com/reply-to-comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryId,
+          commentId,
+          replyContent: text,
+          replierName: user.displayName || "Anonymous",
+          authorId: user.uid,
+        }),
+      });
+
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message);
+
+      toast.success("↩️ Replied successfully!");
+      setReplyBoxes((prev) => {
+        const updated = { ...prev };
+        delete updated[commentId];
+        return updated;
+      });
+    } catch (err) {
+      console.error("Reply failed:", err);
+      toast.error("❌ Failed to reply");
+    }
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!comment.trim() || !user) return;
@@ -100,22 +136,22 @@ export default function CommentSection({ entryId }) {
     toast.success("✏️ Edited");
   };
 
-  const handleReplySubmit = async (commentId, text) => {
-    if (!text.trim() || !user) return;
-    const ref = collection(db, "entries", entryId, "comments", commentId, "replies");
-    await addDoc(ref, {
-      content: text,
-      authorId: user.uid,
-      authorName: user.displayName || "Anonymous",
-      timestamp: serverTimestamp(),
-    });
-    toast.success("↩️ Replied");
-    setReplyBoxes((prev) => {
-      const updated = { ...prev };
-      delete updated[commentId];
-      return updated;
-    });
-  };
+  // const handleReplySubmit = async (commentId, text) => {
+  //   if (!text.trim() || !user) return;
+  //   const ref = collection(db, "entries", entryId, "comments", commentId, "replies");
+  //   await addDoc(ref, {
+  //     content: text,
+  //     authorId: user.uid,
+  //     authorName: user.displayName || "Anonymous",
+  //     timestamp: serverTimestamp(),
+  //   });
+  //   toast.success("↩️ Replied");
+  //   setReplyBoxes((prev) => {
+  //     const updated = { ...prev };
+  //     delete updated[commentId];
+  //     return updated;
+  //   });
+  // };
 
   const pinComment = async (commentId) => {
     await updateDoc(doc(db, "entries", entryId), { pinnedCommentId: commentId });
