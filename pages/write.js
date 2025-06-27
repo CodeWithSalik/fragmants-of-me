@@ -22,6 +22,13 @@ export default function WritePage() {
 
   const AUTHOR_OPTIONS = [
     "Salik Pirzada",
+    "Pirzada Faizan",
+    "Khushnama",
+    "Sahiba Yaseen",
+    "Dania Bashir",
+    "Cobra Daniel",
+    "Black Widow",
+    "Daniyal",
     "Anonymous",
     "Abdul Kareem",
     "My Inner Self",
