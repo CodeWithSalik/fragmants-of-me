@@ -11,7 +11,6 @@ export default function Private() {
   const [user] = useAuthState(auth);
   const [message, setMessage] = useState("");
 
-
   useEffect(() => {
     if (!user) return;
     const fetchEntries = async () => {
@@ -36,7 +35,7 @@ export default function Private() {
       setEntries((prev) => prev.filter((e) => e.id !== id));
 
       setMessage("✅ Visibility updated. Post is now public.");
-      setTimeout(() => setMessage(""), 3000); // auto-hide after 3 seconds
+      setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       console.error("Error making post public:", err);
       setMessage("❌ Failed to update visibility.");
@@ -44,33 +43,32 @@ export default function Private() {
     }
   };
 
-
   return (
     <div className="space-y-6 max-w-3xl mx-auto mt-8 px-4">
-      <h1 className="text-3xl font-semibold mb-4">Your Private Entries</h1>
+      <h1 className="text-3xl font-semibold mb-4 text-amber-dark dark:text-amber-300">Your Private Entries</h1>
       {message && (
-        <div className="mb-4 px-4 py-2 rounded bg-green-100 border border-green-400 text-green-800 text-sm">
+        <div className="mb-4 px-4 py-2 rounded bg-green-100 border border-green-400 text-green-800 text-sm dark:bg-green-900 dark:text-green-200 dark:border-green-700">
           {message}
         </div>
       )}
       {entries.map((entry) => (
         <div
           key={entry.id}
-          className="bg-white p-5 rounded shadow border-l-4 border-amber relative"
+          className="bg-white dark:bg-[#2c261f] p-5 rounded shadow border-l-4 border-amber relative text-ink dark:text-[#fefae0]"
         >
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-semibold text-ink">{entry.title}</h3>
+            <h3 className="text-xl font-semibold text-ink dark:text-[#fefae0]">{entry.title}</h3>
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"}`}>
               {entry.type?.charAt(0).toUpperCase() + entry.type?.slice(1) || "Unknown"}
             </span>
           </div>
-<p className="text-sm text-gray-600">✍️ by {entry.authorName}</p>
+          <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-[#b9b4a7]">
             {entry.timestamp?.toDate().toLocaleDateString()}
           </p>
 
-          <p className="mt-2 text-gray-700 line-clamp-3">{entry.content.slice(0, 200)}...</p>
+          <p className="mt-2 text-gray-700 dark:text-[#d4cfc7] line-clamp-3">{entry.content.slice(0, 200)}...</p>
 
           <div className="mt-4 flex gap-3">
             <Link href={`/edit/${entry.id}`}>
@@ -81,7 +79,7 @@ export default function Private() {
 
             <button
               className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-              onClick={() => makePublic(entry.id)} // <-- Here is the await being used
+              onClick={() => makePublic(entry.id)}
             >
               Make Public
             </button>

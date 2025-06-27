@@ -42,7 +42,7 @@ export default function Poems() {
         <div className="flex flex-col gap-6">
           {poems.map((entry) => (
             <Link key={entry.id} href={`/entry/${entry.id}`}>
-              <div className="bg-white p-6 rounded-xl border-l-4 border-amber-600 shadow-md hover:shadow-lg group transition-all">
+              <div className="bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0] p-6 rounded-xl border-l-4 border-amber-600 shadow-md hover:shadow-lg group transition-all">
                 <div className="flex justify-between items-center mb-2">
                   <h2 className="text-xl font-semibold text-amber-900 group-hover:underline">
                     {entry.title}
@@ -51,7 +51,7 @@ export default function Poems() {
                     Poem
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">✍️ by {entry.authorName}</p>
+                <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
 
                 <p className="text-sm text-gray-500 mb-1">
                   {entry.timestamp?.toDate().toLocaleDateString()}

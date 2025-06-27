@@ -6,7 +6,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import toast from "react-hot-toast";
-import { checkIfAdmin } from "@/lib/checkAdmin"; // ✅ make sure this returns true/false
+import { checkIfAdmin } from "@/lib/checkAdmin";
 
 export default function EditEntry() {
   const router = useRouter();
@@ -30,14 +30,12 @@ export default function EditEntry() {
     "Abdul Kareem"
   ];
 
-  // ✅ Check admin status
   useEffect(() => {
     if (user?.uid) {
       checkIfAdmin(user.uid).then(setIsAdmin);
     }
   }, [user]);
 
-  // ✅ Fetch entry data if user is admin
   useEffect(() => {
     if (!id || !user || !isAdmin) return;
     const fetchData = async () => {
@@ -83,7 +81,7 @@ export default function EditEntry() {
     return <div className="p-6 text-red-600">Access Denied</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 text-ink dark:text-[#fefae0]">
       <h1 className="text-2xl font-bold mb-6 text-amber-dark">Edit Entry</h1>
 
       {!entry?.isPrivate && (
@@ -99,7 +97,7 @@ export default function EditEntry() {
         <div>
           <label className="block mb-1 font-medium">Title</label>
           <input
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-gray-300 dark:border-[#4d3f2d] rounded bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -108,7 +106,7 @@ export default function EditEntry() {
         <div>
           <label className="block mb-1 font-medium">Content</label>
           <textarea
-            className="w-full p-2 border rounded h-40"
+            className="w-full p-2 border border-gray-300 dark:border-[#4d3f2d] rounded h-40 bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
@@ -118,7 +116,7 @@ export default function EditEntry() {
           <div>
             <label className="block mb-1 font-medium">Type</label>
             <select
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-gray-300 dark:border-[#4d3f2d] rounded bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -131,7 +129,7 @@ export default function EditEntry() {
           <div>
             <label className="block mb-1 font-medium">Author</label>
             <select
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-gray-300 dark:border-[#4d3f2d] rounded bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
             >
@@ -150,7 +148,7 @@ export default function EditEntry() {
           <DatePicker
             selected={timestamp}
             onChange={(date) => setTimestamp(date)}
-            className="p-2 border rounded w-full"
+            className="p-2 border border-gray-300 dark:border-[#4d3f2d] rounded w-full bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]"
             dateFormat="dd MMM yyyy"
           />
         </div>

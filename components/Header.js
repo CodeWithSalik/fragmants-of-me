@@ -1,4 +1,3 @@
-// components/Header.js
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -28,6 +27,7 @@ export default function Header() {
   }, [user]);
 
   const handleLogout = () => {
+    sessionStorage.removeItem("admin_pin_verified");
     auth.signOut();
     router.push("/");
   };
@@ -41,10 +41,10 @@ export default function Header() {
   }, [router]);
 
   const linkStyle =
-    "block py-2 px-4 text-sm sm:text-base text-ink hover:text-amber-dark transition";
+    "block py-2 px-4 text-sm sm:text-base text-ink dark:text-[#fefae0] hover:text-amber-dark dark:hover:text-[#fcd34d] transition";
 
   return (
-    <header className="bg-[#fdf6e3] border-b border-amber-light shadow-md sticky top-0 z-50">
+    <header className="bg-parchment dark:bg-[#29241c] border-b border-amber-light dark:border-[#4d3f2d] shadow-md sticky top-0 z-50 transition-colors">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between sm:justify-start relative">
 
         {/* Logo */}
@@ -54,7 +54,7 @@ export default function Header() {
 
         {/* Title on mobile */}
         <div className="absolute left-1/2 transform -translate-x-1/2 sm:hidden">
-          <span className="text-base italic text-amber-dark font-semibold">
+          <span className="text-base italic text-amber-dark dark:text-[#fcdca1] font-semibold">
             Fragments of Me
           </span>
         </div>
@@ -64,7 +64,7 @@ export default function Header() {
           <button
             onClick={toggleMenu}
             aria-label="Toggle Menu"
-            className="text-2xl text-amber-dark focus:outline-none"
+            className="text-2xl text-amber-dark dark:text-[#fcdca1] focus:outline-none"
           >
             {menuOpen ? <FiX /> : <FiMenu />}
           </button>
@@ -73,7 +73,7 @@ export default function Header() {
         {/* Navigation */}
         <nav
           className={`${menuOpen ? "max-h-[500px]" : "max-h-0"
-            } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-[#fdf6e3] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
+            } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-parchment dark:bg-[#29241c] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
         >
           <Link href="/" className={linkStyle}>Home</Link>
 
@@ -86,7 +86,7 @@ export default function Header() {
           )}
 
           {user && (
-            <Link href="/profile" className="text-xl sm:text-base text-ink hover:text-amber-dark px-4 sm:px-0">
+            <Link href="/profile" className="text-xl sm:text-base text-ink dark:text-[#fefae0] hover:text-amber-dark dark:hover:text-[#fcd34d] px-4 sm:px-0">
               <FiUser />
             </Link>
           )}
@@ -96,6 +96,7 @@ export default function Header() {
               <Link href="/write" className={linkStyle}>Write</Link>
               <Link href="/private" className={linkStyle}>Private</Link>
               <Link href="/quote" className={linkStyle}>Edit Quote</Link>
+              <Link href="/admin" className={linkStyle}>Admin Panel</Link>
             </>
           )}
 
@@ -106,7 +107,7 @@ export default function Header() {
           ) : (
             <button
               onClick={handleLogout}
-              className="text-red-500 hover:underline text-sm sm:text-base px-4 sm:px-0"
+              className="text-red-500 dark:text-red-400 hover:underline text-sm sm:text-base px-4 sm:px-0"
             >
               Logout
             </button>

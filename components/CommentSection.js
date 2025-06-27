@@ -1,4 +1,3 @@
-// ✅ Updated CommentSection.js
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -11,7 +10,6 @@ import {
   deleteDoc,
   updateDoc,
   getDoc,
-  setDoc,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -29,12 +27,10 @@ export default function CommentSection({ entryId }) {
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 🧠 Determine if user is admin
   useEffect(() => {
     if (user?.uid) checkIfAdmin(user.uid).then(setIsAdmin);
   }, [user]);
 
-  // 🧷 Load pinned comment
   useEffect(() => {
     const ref = doc(db, "entries", entryId);
     getDoc(ref).then((snap) => {
@@ -44,7 +40,6 @@ export default function CommentSection({ entryId }) {
     });
   }, [entryId]);
 
-  // 💬 Load Comments + Replies
   useEffect(() => {
     const unsubscribeReplies = {};
     const q = query(collection(db, "entries", entryId, "comments"), orderBy("timestamp", "desc"));
@@ -137,14 +132,16 @@ export default function CommentSection({ entryId }) {
   const renderComment = (c, isPinned = false) => (
     <div
       key={c.id}
-      className={`border-l-4 pl-4 ${isPinned ? "border-green-600" : "border-amber"} bg-white p-3 rounded shadow-sm`}
+      className={`border-l-4 pl-4 rounded shadow-sm transition-all duration-300 
+        ${isPinned ? "border-green-600" : "border-amber"} 
+        bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]`}
     >
       {editingId === c.id ? (
         <>
           <textarea
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            className="w-full p-2 border rounded mb-2"
+            className="w-full p-2 border rounded mb-2 bg-white dark:bg-[#2c261f] text-gray-800 dark:text-[#fefae0] border-gray-300 dark:border-[#4d3f2d]"
           />
           <div className="flex gap-2 text-sm">
             <button onClick={() => handleEdit(c.id)} className="text-green-600 hover:underline">
@@ -158,24 +155,41 @@ export default function CommentSection({ entryId }) {
       ) : (
         <>
           <p
-            className={`text-sm mb-1 whitespace-pre-wrap ${c.authorId === user?.uid && isAdmin ? "text-amber-dark font-semibold" : "text-gray-800"}`}
+            className={`text-sm mb-1 whitespace-pre-wrap ${c.authorId === user?.uid && isAdmin
+              ? "text-amber-dark font-semibold"
+              : "text-gray-800 dark:text-[#fefae0]"
+              }`}
           >
             {c.content}
           </p>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-[#b9b4a7]">
             {c.authorName} • {c.timestamp?.toDate().toLocaleString()}
           </div>
 
-          <div className="text-xs space-x-3 mt-1">
-            <button onClick={() => setReplyBoxes((prev) => ({ ...prev, [c.id]: prev[c.id] ? "" : "" }))} className="text-blue-600 hover:underline">
+          <div className="text-xs space-x-3 mt-1 text-gray-600 dark:text-[#d4cfc7]">
+            <button
+              onClick={() =>
+                setReplyBoxes((prev) => ({ ...prev, [c.id]: prev[c.id] ? "" : "" }))
+              }
+              className="text-blue-600 hover:underline"
+            >
               Reply
             </button>
             {(user?.uid === c.authorId || isAdmin) && (
               <>
-                <button onClick={() => { setEditingId(c.id); setEditText(c.content); }} className="text-blue-600 hover:underline">
+                <button
+                  onClick={() => {
+                    setEditingId(c.id);
+                    setEditText(c.content);
+                  }}
+                  className="text-blue-600 hover:underline"
+                >
                   Edit
                 </button>
-                <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:underline">
+                <button
+                  onClick={() => handleDelete(c.id)}
+                  className="text-red-600 hover:underline"
+                >
                   Delete
                 </button>
               </>
@@ -190,14 +204,18 @@ export default function CommentSection({ entryId }) {
           </div>
 
           {replies[c.id]?.length > 0 && (
-            <div className="mt-2 border-l-2 pl-3 border-gray-200 space-y-2">
+            <div className="mt-2 border-l-2 pl-3 border-gray-200 dark:border-[#4d3f2d] space-y-2">
               {replies[c.id].map((r) => (
                 <div
                   key={r.id}
-                  className={`p-2 rounded text-sm ${r.authorId === user?.uid && isAdmin ? "bg-yellow-100" : "bg-gray-50"}`}
+                  className={`p-2 rounded text-sm 
+                    ${r.authorId === user?.uid && isAdmin
+                      ? "bg-yellow-100 dark:bg-[#3a2f22]"
+                      : "bg-gray-50 dark:bg-[#1e1b16]"
+                    } text-gray-800 dark:text-[#fefae0]`}
                 >
                   <p>{r.content}</p>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-[#b9b4a7]">
                     {r.authorName} • {r.timestamp?.toDate().toLocaleString()}
                   </div>
                 </div>
@@ -208,10 +226,12 @@ export default function CommentSection({ entryId }) {
           {replyBoxes[c.id] !== undefined && (
             <div className="mt-2">
               <textarea
-                className="w-full p-2 border rounded text-sm"
+                className="w-full p-2 border rounded text-sm bg-white dark:bg-[#2c261f] text-gray-800 dark:text-[#fefae0] border-gray-300 dark:border-[#4d3f2d]"
                 rows="2"
                 value={replyBoxes[c.id]}
-                onChange={(e) => setReplyBoxes((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                onChange={(e) =>
+                  setReplyBoxes((prev) => ({ ...prev, [c.id]: e.target.value }))
+                }
                 placeholder="Write a reply..."
               />
               <button
@@ -233,23 +253,26 @@ export default function CommentSection({ entryId }) {
       {user ? (
         <form onSubmit={handleSubmit} className="mb-6">
           <textarea
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-[#2c261f] text-gray-800 dark:text-[#fefae0] border-gray-300 dark:border-[#4d3f2d]"
             rows="3"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Write a comment..."
           />
-          <button type="submit" className="mt-2 bg-amber text-white px-4 py-1 rounded hover:bg-amber-dark">
+          <button
+            type="submit"
+            className="mt-2 bg-amber text-white px-4 py-1 rounded hover:bg-amber-dark"
+          >
             Post Comment
           </button>
         </form>
       ) : (
-        <p className="text-sm text-gray-600">Login to comment.</p>
+        <p className="text-sm text-gray-600 dark:text-[#b9b4a7]">Login to comment.</p>
       )}
 
       <div className="space-y-6">
-        {pinnedId && comments.filter(c => c.id === pinnedId).map(c => renderComment(c, true))}
-        {comments.filter(c => c.id !== pinnedId).map(c => renderComment(c, false))}
+        {pinnedId && comments.filter((c) => c.id === pinnedId).map((c) => renderComment(c, true))}
+        {comments.filter((c) => c.id !== pinnedId).map((c) => renderComment(c, false))}
       </div>
     </div>
   );

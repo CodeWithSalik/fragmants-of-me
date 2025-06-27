@@ -125,7 +125,7 @@ export default function EntryPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold text-amber-dark mb-1">{entry.title}</h1>
-      <p className="text-sm text-gray-600">✍️ by {entry.authorName}</p>
+      <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
 
       <p className="text-sm text-gray-500 mb-6">
         {entry.timestamp?.toDate().toLocaleDateString()} — {entry.type}
