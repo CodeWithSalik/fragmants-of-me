@@ -10,7 +10,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import Link from "next/link";
-import Head from "next/head"; // ✅ Import Head from next/head
+import Head from "next/head";
 
 export default function Home() {
   const [entries, setEntries] = useState([]);
@@ -54,23 +54,34 @@ export default function Home() {
   };
 
   return (
-
     <div className="max-w-3xl mx-auto px-4 py-10">
-      {quote && (
-        <div className="mb-8 text-center italic text-lg sm:text-xl text-gray-700 dark:text-[#d4cfc7] font-serif px-4">
-          “{quote}”
-        </div>
-      )}
       <Head>
-
         <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
-        {/* ✅ Google AdSense script for Auto Ads */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
           crossOrigin="anonymous"
         ></script>
       </Head>
+
+      {/* 📜 Quote Section */}
+      {quote && (
+        <div className="mb-4 text-center italic text-lg sm:text-xl text-gray-700 dark:text-[#d4cfc7] font-serif px-4">
+          “{quote}”
+        </div>
+      )}
+
+      {/* ☕ Support Button */}
+      <div className="mb-8 text-center">
+        <a
+          href="https://coff.ee/codewithsalik"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block px-4 py-2 text-sm font-medium bg-amber-600 text-white rounded-full shadow hover:bg-amber-700 transition"
+        >
+          ☕ Buy me a coffee / Support my work
+        </a>
+      </div>
 
       <h1 className="text-3xl font-bold text-amber-900 dark:text-[#fcdca1] mb-6">
         Latest Fragments
