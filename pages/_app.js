@@ -8,6 +8,7 @@ import Layout from "@/components/Layout";
 import { pingBackend } from "@/lib/pingBackend";
 import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import Head from "next/head"; // ✅ Import Head from next/head
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -33,6 +34,15 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+      <Head>
+        {/* ✅ Google AdSense script for Auto Ads */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
+          crossOrigin="anonymous"
+        ></script>
+      </Head>
+
       <Toaster
         position="top-center"
         toastOptions={{
@@ -44,6 +54,7 @@ export default function App({ Component, pageProps }) {
           },
         }}
       />
+
       <Layout>
         <AnimatePresence mode="wait">
           <motion.main
