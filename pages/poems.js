@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import Link from "next/link";
+import Head from "next/head"; // ✅ Import Head from next/head
 
 export default function Poems() {
   const [poems, setPoems] = useState([]);

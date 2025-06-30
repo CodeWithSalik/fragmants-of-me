@@ -10,6 +10,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import Link from "next/link";
+import Head from "next/head"; // ✅ Import Head from next/head
 
 export default function Home() {
   const [entries, setEntries] = useState([]);

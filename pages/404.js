@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Head from "next/head"; // ✅ Import Head from next/head
 
 export default function Custom404() {
   return (
