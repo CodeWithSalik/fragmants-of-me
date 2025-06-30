@@ -35,6 +35,8 @@ export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
       <Head>
+
+        <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
         {/* ✅ Google AdSense script for Auto Ads */}
         <script
           async

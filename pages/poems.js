@@ -33,6 +33,16 @@ export default function Poems() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold text-amber-900 mb-6">Poems</h1>
+      <Head>
+
+        <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
+        {/* ✅ Google AdSense script for Auto Ads */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
+          crossOrigin="anonymous"
+        ></script>
+      </Head>
 
       {loading ? (
         <p className="text-center text-gray-500">Loading poems...</p>

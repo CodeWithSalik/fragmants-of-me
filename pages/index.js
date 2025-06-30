@@ -53,12 +53,23 @@ export default function Home() {
   };
 
   return (
+
     <div className="max-w-3xl mx-auto px-4 py-10">
       {quote && (
         <div className="mb-8 text-center italic text-lg sm:text-xl text-gray-700 dark:text-[#d4cfc7] font-serif px-4">
           “{quote}”
         </div>
       )}
+      <Head>
+
+        <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
+        {/* ✅ Google AdSense script for Auto Ads */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
+          crossOrigin="anonymous"
+        ></script>
+      </Head>
 
       <h1 className="text-3xl font-bold text-amber-900 dark:text-[#fcdca1] mb-6">
         Latest Fragments
@@ -78,9 +89,8 @@ export default function Home() {
                     {entry.title}
                   </h2>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      badgeColors[entry.type] || "bg-gray-200 text-gray-800"
-                    }`}
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"
+                      }`}
                   >
                     {entry?.type?.charAt(0).toUpperCase() + entry?.type?.slice(1) || "Unknown"}
                   </span>
