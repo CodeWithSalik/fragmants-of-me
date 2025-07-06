@@ -123,6 +123,7 @@ export default function EntryPage() {
   if (!entry) return <div className="p-6">Loading...</div>;
 
   return (
+    
     <div className="max-w-3xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold text-amber-dark mb-1">{entry.title}</h1>
       <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
@@ -147,6 +148,16 @@ export default function EntryPage() {
           <span className="text-sm text-gray-700">
             👁 {viewsCount} {viewsCount === 1 ? "view" : "views"}
           </span>
+          <div className="mb-8 text-center">
+        <a
+          href="https://coff.ee/codewithsalik"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block px-4 py-2 text-sm font-medium bg-amber-600 text-white rounded-full shadow hover:bg-amber-700 transition"
+        >
+          ☕ Buy me a coffee / Support my work
+        </a>
+      </div>
         </div>
       )}
 
