@@ -33,6 +33,7 @@ export default function WritePage() {
     "Abdul Kareem",
     "My Inner Self",
     "Someone Else",
+    "Pirzada Abrar Nazir"
   ];
 
   // 🔐 Auth + Admin Verification
