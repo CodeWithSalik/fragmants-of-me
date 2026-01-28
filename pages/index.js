@@ -77,13 +77,13 @@ export default function Home() {
           href="https://coff.ee/codewithsalik"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block px-4 py-2 text-sm font-medium bg-amber-600 text-white rounded-full shadow hover:bg-amber-700 transition"
+          className="inline-block px-4 py-2 text-sm font-medium bg-accent text-white rounded-full shadow hover:bg-amber-700 transition"
         >
           ☕ Buy me a coffee / Support my work
         </a>
       </div>
 
-      <h1 className="text-3xl font-bold text-amber-900 dark:text-[#fcdca1] mb-6">
+      <h1 className="text-3xl font-bold text-accent dark:text-[#fcdca1] mb-6">
         Latest Fragments
       </h1>
 
@@ -92,12 +92,12 @@ export default function Home() {
       ) : entries.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-[#b9b4a7]">No entries yet.</p>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="stack">
           {entries.map((entry) => (
             <Link key={entry.id} href={`/entry/${entry.id}`}>
               <div className="bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0] p-6 rounded-xl border-l-4 border-amber-600 shadow-md hover:shadow-lg group transition-all">
                 <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-xl font-semibold text-amber-900 dark:text-[#fcdca1] group-hover:underline">
+                  <h2 className="text-xl font-semibold text-accent dark:text-[#fcdca1] group-hover:underline">
                     {entry.title}
                   </h2>
                   <span

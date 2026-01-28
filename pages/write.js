@@ -17,6 +17,8 @@ export default function WritePage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [mood, setMood] = useState("warm");
+
 
   const router = useRouter();
 
@@ -74,6 +76,7 @@ export default function WritePage() {
       timestamp: selectedDate,
       uid: user.uid,
       authorName,
+      mood,
     });
 
     await fetch("https://newyear-backend.onrender.com/send-broadcast", {
@@ -154,6 +157,17 @@ export default function WritePage() {
                 </option>
               ))}
             </select>
+            <select
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="border border-amber-dark p-2 rounded bg-white dark:bg-[#2c261f] dark:text-[#fefae0]"
+            >
+              <option value="warm">Warm</option>
+              <option value="soft">Soft</option>
+              <option value="melancholic">Melancholic</option>
+              <option value="dark">Dark</option>
+            </select>
+
 
             <label className="flex items-center gap-2 text-sm">
               <input

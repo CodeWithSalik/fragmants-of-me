@@ -1,5 +1,7 @@
+import AmbientPlayer from "@/components/AmbientPlayer";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { moodThemes } from "@/lib/moodThemes";
 import {
   getDoc,
   doc,
@@ -16,6 +18,11 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import CommentSection from "@/components/CommentSection";
 import toast from "react-hot-toast";
 import { checkIfAdmin } from "@/lib/checkAdmin";
+import MotionWrap from "@/components/MotionWrap";
+import ReactionLine from "@/components/ReactionLine";
+
+
+
 
 export default function EntryPage() {
   const router = useRouter();
@@ -120,71 +127,97 @@ export default function EntryPage() {
     }
   };
 
+
   if (!entry) return <div className="p-6">Loading...</div>;
 
   return (
-    
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold text-amber-dark mb-1">{entry.title}</h1>
-      <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
+    <>
+      <AmbientPlayer mood={entry.mood} />
+      <div className={`${moodThemes[entry.mood] || moodThemes.warm} min-h-screen px-6 py-10`}>
+        <div className="max-w-3xl mx-auto">
 
-      <p className="text-sm text-gray-500 mb-6">
-        {entry.timestamp?.toDate().toLocaleDateString()} — {entry.type}
-      </p>
+          <MotionWrap>
+            <h1 className="title text-4xl md:text-5xl font-semibold tracking-tight mb-2">
 
-      <div className="prose prose-amber mb-6 whitespace-pre-wrap">
-        {entry.content}
-      </div>
 
-      {user && (
-        <div className="flex items-center gap-4 mt-6">
-          <button onClick={toggleLike} className="text-2xl">
-            {hasLiked ? "❤️" : "🤍"}
-          </button>
-          <span className="text-sm text-gray-700">
-            {likesCount} {likesCount === 1 ? "like" : "likes"}
-          </span>
+              {entry.title}
+            </h1>
+          </MotionWrap>
 
-          <span className="text-sm text-gray-700">
-            👁 {viewsCount} {viewsCount === 1 ? "view" : "views"}
-          </span>
-          <div className="mb-8 text-center">
-        <a
-          href="https://coff.ee/codewithsalik"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block px-4 py-2 text-sm font-medium bg-amber-600 text-white rounded-full shadow hover:bg-amber-700 transition"
-        >
-          ☕ Buy me a coffee / Support my work
-        </a>
-      </div>
+          <p className="small-text">✍️ by {entry.authorName}</p>
+
+          <p className="small-text
+">
+            {entry.timestamp?.toDate().toLocaleDateString()} — {entry.type}
+          </p>
+
+          <MotionWrap delay={0.15}>
+            <div className="prose prose-amber mb-6 whitespace-pre-wrap glass p-6">
+
+              {entry.content.split("\n").map((line, i) => (
+                <ReactionLine
+                  key={i}
+                  entryId={entry.id}
+                  lineIndex={i}
+                  text={line}
+                />
+              ))}
+
+            </div>
+          </MotionWrap>
+
+
+          {user && (
+            <div className="flex items-center gap-4 mt-6">
+              <button onClick={toggleLike} className="text-2xl">
+                {hasLiked ? "❤️" : "🤍"}
+              </button>
+              <span className="text-sm text-gray-700">
+                {likesCount} {likesCount === 1 ? "like" : "likes"}
+              </span>
+
+              <span className="text-sm text-gray-700">
+                👁 {viewsCount} {viewsCount === 1 ? "view" : "views"}
+              </span>
+              <div className="mb-8 text-center">
+                <a
+                  href="https://coff.ee/codewithsalik"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 text-sm font-medium bg-accent text-white rounded-full shadow hover:bg-amber-700 transition"
+                >
+                  ☕ Buy me a coffee / Support my work
+                </a>
+              </div>
+            </div>
+          )}
+
+          <CommentSection entryId={entry.id} />
+
+          {isAdmin && (
+            <div className="flex gap-4 mt-6 text-sm">
+              <button
+                onClick={() => router.push(`/edit/${entry.id}`)}
+                className="text-blue-600 hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-red-600 hover:underline"
+              >
+                Delete
+              </button>
+              <button
+                onClick={togglePrivacy}
+                className="text-accent hover:underline"
+              >
+                Make {entry.isPrivate ? "Public" : "Private"}
+              </button>
+            </div>
+          )}
         </div>
-      )}
-
-      <CommentSection entryId={entry.id} />
-
-      {isAdmin && (
-        <div className="flex gap-4 mt-6 text-sm">
-          <button
-            onClick={() => router.push(`/edit/${entry.id}`)}
-            className="text-blue-600 hover:underline"
-          >
-            Edit
-          </button>
-          <button
-            onClick={handleDelete}
-            className="text-red-600 hover:underline"
-          >
-            Delete
-          </button>
-          <button
-            onClick={togglePrivacy}
-            className="text-amber-600 hover:underline"
-          >
-            Make {entry.isPrivate ? "Public" : "Private"}
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

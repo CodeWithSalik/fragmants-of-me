@@ -20,6 +20,8 @@ export default function EditEntry() {
   const [type, setType] = useState("diary");
   const [timestamp, setTimestamp] = useState(new Date());
   const [authorName, setAuthorName] = useState("");
+  const [mood, setMood] = useState("warm");
+
 
   const AUTHOR_OPTIONS = [
     "Salik Pirzada",
@@ -46,9 +48,11 @@ export default function EditEntry() {
         setEntry(data);
         setTitle(data.title || "");
         setContent(data.content || "");
+        setMood(data.mood || "warm");
         setType(data.type || "diary");
         setAuthorName(data.authorName || "");
         setTimestamp(data.timestamp?.toDate() || new Date());
+
       }
     };
     fetchData();
@@ -71,7 +75,7 @@ export default function EditEntry() {
       return toast.error("Please fill in all fields, including author.");
     }
     const ref = doc(db, "entries", id);
-    await updateDoc(ref, { title, content, type, timestamp, authorName });
+    await updateDoc(ref, { title, content, type, timestamp, authorName, mood });
     toast.success("✅ Entry updated!");
     router.push(`/entry/${id}`);
   };
@@ -82,7 +86,7 @@ export default function EditEntry() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 text-ink dark:text-[#fefae0]">
-      <h1 className="text-2xl font-bold mb-6 text-amber-dark">Edit Entry</h1>
+      <h1 className="text-2xl font-bold mb-6 text-accent">Edit Entry</h1>
 
       {!entry?.isPrivate && (
         <button
@@ -140,6 +144,17 @@ export default function EditEntry() {
                 </option>
               ))}
             </select>
+            <select
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              className="w-full p-2 border border-gray-300 dark:border-[#4d3f2d] rounded bg-white dark:bg-[#2c261f]"
+            >
+              <option value="warm">Warm</option>
+              <option value="soft">Soft</option>
+              <option value="melancholic">Melancholic</option>
+              <option value="dark">Dark</option>
+            </select>
+
           </div>
         </div>
 

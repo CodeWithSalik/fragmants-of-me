@@ -31,7 +31,7 @@ export default function Layout({ children }) {
       <Header />
       {showModal && <LoginRegisterModal onClose={() => setShowModal(false)} />}
       <main
-        className={`flex-grow max-w-3xl mx-auto pt-10 pb-20 px-4 sm:px-6 lg:px-8 transition-all duration-300 ${showModal ? "blur-sm pointer-events-none select-none" : ""
+        className={`flex-grow max-w-3xl mx-auto pt-16 pb-28 px-6 sm:px-6 lg:px-8 transition-all duration-300 ${showModal ? "blur-sm pointer-events-none select-none" : ""
           }`}
       >
         {children}

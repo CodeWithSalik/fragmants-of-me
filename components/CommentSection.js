@@ -147,7 +147,7 @@ export default function CommentSection({ entryId }) {
   const renderComment = (c, isPinned = false) => (
     <div
       key={c.id}
-      className={`border-l-4 pl-4 rounded shadow-sm transition-all duration-300 
+      className={`border-l-4 pl-4 glass shadow-sm transition-all duration-300 
         ${isPinned ? "border-green-600" : "border-amber"} 
         bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0]`}
     >

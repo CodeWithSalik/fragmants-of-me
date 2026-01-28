@@ -44,7 +44,7 @@ export default function Monologue() {
       ) : monologues.length === 0 ? (
         <p className="text-center text-gray-500 dark:text-gray-400">No monologues yet.</p>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="stack">
           {monologues.map((entry) => (
             <Link key={entry.id} href={`/entry/${entry.id}`}>
               <div className="bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0] p-6 rounded-xl border-l-4 border-amber-600 shadow-md hover:shadow-lg group transition-all">

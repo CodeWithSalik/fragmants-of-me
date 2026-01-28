@@ -19,6 +19,7 @@ module.exports = {
       colors: {
         parchment: "#fdf6e3",
         ink: "#2c2c2c",
+        accent: "#E6B15C",
         amber: {
           DEFAULT: "#b85c38",
           dark: "#7c2d12",
