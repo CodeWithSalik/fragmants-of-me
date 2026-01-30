@@ -1,4 +1,3 @@
-// pages/_app.js
 import "@/styles/globals.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
@@ -8,19 +7,20 @@ import Layout from "@/components/Layout";
 import { pingBackend } from "@/lib/pingBackend";
 import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import Head from "next/head"; // ✅ Import Head from next/head
+import AmbientPlayer from "@/components/AmbientPlayer";
+import Head from "next/head";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
-  const [showDarkToggle, setShowDarkToggle] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [ambientMood, setAmbientMood] = useState("warm");
 
   useEffect(() => {
-    pingBackend(); // 🔄 Initial ping
+    pingBackend();
 
-    // Show dark toggle only on homepage
-    setShowDarkToggle(router.pathname === "/");
+    // FIX: Always show controls so music/theme works on Entry pages too
+    setShowControls(true); 
 
-    // Apply dark mode from localStorage (persisted user setting)
     const root = document.documentElement;
     const isDark = localStorage.getItem("theme") === "dark";
     if (isDark) {
@@ -28,34 +28,37 @@ export default function App({ Component, pageProps }) {
     } else {
       root.classList.remove("dark");
     }
-
-    document.body.classList.add("bg-parchment", "text-ink");
-  }, [router.pathname]);
+  }, []);
 
   return (
     <AuthProvider>
       <Head>
-
         <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
-        {/* ✅ Google AdSense script for Auto Ads */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
-          crossOrigin="anonymous"
-        ></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556" crossOrigin="anonymous"></script>
       </Head>
+
+      <div className="aura" />
 
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 3000,
           style: {
-            background: "#fef3c7",
-            color: "#92400e",
+            background: "var(--bg-surface)",
+            color: "var(--accent)",
             fontWeight: "500",
+            border: "1px solid rgba(0,0,0,0.05)"
           },
         }}
       />
+
+      {/* Floating Controls */}
+      {showControls && (
+        <>
+          <DarkModeToggle />
+          <AmbientPlayer mood={ambientMood} />
+        </>
+      )}
 
       <Layout>
         <AnimatePresence mode="wait">
@@ -67,8 +70,7 @@ export default function App({ Component, pageProps }) {
             transition={{ duration: 0.3 }}
             className="min-h-screen"
           >
-            <Component {...pageProps} />
-            {showDarkToggle && <DarkModeToggle />}
+            <Component {...pageProps} setAmbientMood={setAmbientMood} />
           </motion.main>
         </AnimatePresence>
       </Layout>

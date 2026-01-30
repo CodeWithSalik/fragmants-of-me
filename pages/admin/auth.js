@@ -12,59 +12,50 @@ export default function AdminAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    const verified = sessionStorage.getItem("admin_pin_verified") === "true";
-    if (verified) router.push("/admin");
-  }, []);
+    if (sessionStorage.getItem("admin_pin_verified") === "true") router.push("/admin");
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const ref = doc(db, "settings", "adminPin");
-      const snap = await getDoc(ref);
-      const correctPin = snap.data()?.pin;
-
-      if (pin === correctPin) {
+      const snap = await getDoc(doc(db, "settings", "adminPin"));
+      if (pin === snap.data()?.pin) {
         sessionStorage.setItem("admin_pin_verified", "true");
-        toast.success("✅ PIN verified");
+        toast.success("Access Granted");
         router.push("/admin");
       } else {
-        toast.error("❌ Incorrect PIN");
+        toast.error("Incorrect PIN");
       }
-    } catch (err) {
-      toast.error("Failed to verify PIN");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (err) { toast.error("Verification failed"); } 
+    finally { setSubmitting(false); }
   };
 
-  if (loading || !user)
-    return <p className="p-6 text-green-400 font-mono bg-black min-h-screen">Loading...</p>;
+  if (loading || !user) return <div className="min-h-screen flex items-center justify-center text-muted">Verifying identity...</div>;
 
   return (
-    <div className="min-h-screen bg-black text-green-400 flex items-center justify-center px-4 font-mono">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-[#111] border border-green-500 p-8 rounded-lg shadow-lg max-w-sm w-full"
-      >
-        <h2 className="text-xl font-bold mb-6 text-amber-400 text-center tracking-wider">
-          🛡️ Admin PIN Required
-        </h2>
-        <input
-          type="password"
-          placeholder="Enter secure PIN"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          className="w-full bg-black text-green-300 border border-green-700 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-amber-400 mb-6"
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded transition"
-        >
-          {submitting ? "Verifying..." : "Enter"}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="aura-card reading-mode w-full max-w-sm">
+        <div className="aura-card-content p-10 text-center">
+          <div className="text-4xl mb-4">🛡️</div>
+          <h1 className="text-2xl font-serif font-bold text-ink mb-2">Admin Access</h1>
+          <p className="text-muted text-sm mb-8">Security PIN Required</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input 
+              type="password" 
+              placeholder="Enter PIN" 
+              className="text-center tracking-[0.5em] font-bold text-xl" 
+              value={pin} 
+              onChange={(e) => setPin(e.target.value)} 
+              autoFocus
+            />
+            <button disabled={submitting} className="btn-primary w-full py-3">
+              {submitting ? "Checking..." : "Unlock Panel"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

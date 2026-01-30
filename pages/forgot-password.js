@@ -2,6 +2,7 @@ import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -12,41 +13,49 @@ export default function ForgotPassword() {
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      toast.success("📩 Password reset email sent!");
+      toast.success("Reset email sent. Check your inbox.");
     } catch (error) {
-      toast.error("❌ " + error.message);
+      toast.error("Failed to send email.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-parchment flex items-center justify-center p-4">
-      <form
-        onSubmit={handleReset}
-        className="bg-white shadow-md rounded-xl p-8 w-full max-w-md border border-amber"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center text-amber-dark">
-          Forgot Password
-        </h2>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="aura-card w-full max-w-md reading-mode">
+        <div className="aura-card-content p-8 md:p-10 text-center">
+          
+          <h1 className="text-2xl font-serif font-bold text-ink mb-2">Reset Access</h1>
+          <p className="text-muted text-sm mb-8">Enter your email to recover your account.</p>
 
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="w-full mb-6 p-2 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <form onSubmit={handleReset} className="space-y-6">
+            <input
+              type="email"
+              placeholder="your@email.com"
+              className="w-full text-center"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-amber hover:bg-amber-dark text-white font-semibold py-2 rounded transition-all"
-        >
-          {loading ? "Sending..." : "Send Reset Email"}
-        </button>
-      </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3"
+            >
+              {loading ? "Sending..." : "Send Reset Link"}
+            </button>
+          </form>
+
+          <div className="mt-8">
+            <Link href="/login" className="text-xs text-accent font-bold uppercase tracking-widest hover:underline">
+              Return to Login
+            </Link>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }

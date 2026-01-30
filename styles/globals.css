@@ -2,214 +2,214 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🌿 Base Global Styles */
+/* =========================
+   1. DESIGN TOKENS
+   ========================= */
+:root {
+  /* BACKGROUNDS */
+  --bg-parchment:   #fdfcf8;
+  --bg-surface:     #ffffff;
+  
+  /* TEXT - The "Stylish" Espresso Update */
+  --ink:            #2b2118; /* Deep Espresso (Rich & Dark) */
+  --muted:          #857f72; /* Warm Stone Gray */
+  --accent:         #b45309; /* Amber */
+  
+  --border-soft:    #e5e5e5;
+  --radius-xl:      1.5rem;
+
+  /* Aura Colors */
+  --aura-1: #fbbf24;
+  --aura-2: #f43f5e;
+  --aura-3: #8b5cf6;
+}
+
+.dark {
+  --bg-parchment:   #050505; /* True Black */
+  --bg-surface:     #121212;
+  
+  --ink:            #e5e5e5; /* Soft White */
+  --muted:          #a3a3a3; /* Neutral Gray */
+  --accent:         #fcd34d; /* Bright Amber */
+  --border-soft:    #262626;
+
+  --aura-1: #d97706;
+  --aura-2: #be123c;
+  --aura-3: #5b21b6;
+}
+
+/* =========================
+   2. ATMOSPHERE & TYPOGRAPHY
+   ========================= */
 html {
-  background: linear-gradient(180deg, #fafafa 0%, #f2efe9 100%);
-  color: #1c1c1c;
-  background-image: url('/grain.png');
-  background-size: cover;
-  background-repeat: repeat;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  color: var(--ink);
+  scroll-behavior: smooth;
+  letter-spacing: 0.01em; 
+  
+  /* Grain Texture */
+  background: 
+    radial-gradient(circle at 50% 0%, #fffbf0 0%, #f7f4e8 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
   background-attachment: fixed;
   background-blend-mode: soft-light;
-  font-family: 'Libre Baskerville', Georgia, serif;
-  letter-spacing: 0.2px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark {
+  background: 
+    radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.07'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+}
+
+body { margin: 0; min-height: 100vh; background: transparent; }
+
+/* =========================
+   3. NAVIGATION STYLING (The Magical Underline)
+   ========================= */
+.nav-link {
+  position: relative;
+  display: inline-block;
+  color: var(--ink);
+  opacity: 0.85;
+  /* Color handled by Tailwind utility classes in JS for safety */
+}
+.nav-link:hover {
+  opacity: 1;
+  text-shadow: 0 0 12px rgba(230, 177, 92, 0.25);
+}
+
+.nav-link.active {
+  opacity: 1;
+  text-shadow: 0 0 14px rgba(230, 177, 92, 0.45);
+}
+/* The Animated Underline */
+.nav-link {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    transparent
+  );
+
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+
+  opacity: 0.85;
+  border-radius: 999px;
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.nav-link.active::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* =========================
+   4. AURA CARDS
+   ========================= */
+.aura-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.aura-card::before {
+  content: ""; position: absolute; inset: -3px; border-radius: inherit; z-index: -1;
+  background: linear-gradient(135deg, var(--aura-1), var(--aura-2), var(--aura-3), var(--aura-1));
+  background-size: 300% 300%;
+  filter: blur(16px); opacity: 0.3;
+  animation: auraFlow 12s ease infinite;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.dark .aura-card::before { opacity: 0.45; filter: blur(20px); }
+
+.aura-card:not(.reading-mode):hover { transform: scale(1.02) translateY(-4px); z-index: 10; }
+.aura-card:not(.reading-mode):active { transform: scale(0.98); }
+.aura-card:not(.reading-mode):hover::before { opacity: 0.7; filter: blur(24px); }
+
+.aura-card.reading-mode { transform: none !important; cursor: default; box-shadow: 0 20px 60px -10px rgba(0,0,0,0.15); }
+.aura-card.reading-mode::before { inset: -2px; opacity: 0.25; filter: blur(12px); }
+
+@keyframes auraFlow {
+  0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+}
+
+.aura-card-content {
+  position: relative; height: 100%;
+  background-color: #fcfbf9; 
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-soft);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0.0));
+  background-blend-mode: multiply, normal; 
+  overflow: hidden;
+}
+.dark .aura-card-content {
+  background-color: #151210;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0));
+  background-blend-mode: overlay, normal;
+}
+
+/* =========================
+   5. UTILITIES
+   ========================= */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+
+h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; }
+.hero-title { font-weight: 800; letter-spacing: -0.04em; }
+
+input, textarea, select {
+  width: 100%; padding: 0.8rem 1.2rem;
+  background: rgba(255,255,255,0.5); backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08); border-radius: 0.8rem;
+  color: var(--ink);
+}
+.dark input, .dark textarea, .dark select { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(24px) saturate(120%);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+.dark .site-header { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.05); }
+
+.container { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; }
+#__next {
+  position: relative;
+  isolation: isolate;
 }
 
 body {
-  min-height: 100vh;
-  margin: 0;
-  @apply bg-parchment text-ink;
+  overflow-x: hidden;
 }
-
-::selection {
-  background-color: #fcd34d;
-  color: #111;
-}
-
-/* 📜 Light Theme Utility Classes */
-.bg-parchment {
-  background-color: #fdf6e3;
-}
-
-.bg-amber {
-  background-color: #b85c38;
-}
-
-.bg-amber-dark {
-  background-color: #7c2d12;
-}
-
-.text-ink {
-  color: #2c2c2c;
-}
-
-.text-amber-dark {
-  color: #92400e;
-}
-
-/* --------------------------- */
-/* 🌒 DARK MODE OVERRIDES     */
-/* --------------------------- */
-
-html.dark {
-  background: linear-gradient(180deg, #0e0e0e 0%, #151515 100%);
-  color: #f5f5f5;
-  background-image: url('/grain.png');
-  background-size: cover;
-  background-repeat: repeat;
-  background-attachment: fixed;
-  background-blend-mode: soft-light;
-}
-
-.dark body {
-  background-color: transparent;
-  color: #fefae0;
-}
-
-/* Header / Navbar */
-.dark header {
-  background-color: #29241c !important;
-}
-
-.dark nav a {
-  color: #fefae0 !important;
-}
-
-.dark nav a:hover {
-  color: #fcd34d !important;
-}
-
-/* Backgrounds & Cards */
-.dark .bg-parchment {
-  background-color: #1e1b16 !important;
-}
-
-.dark .bg-white {
-  background-color: #2c261f !important;
-}
-
-/* Text Variants */
-.dark .text-ink {
-  color: #fefae0;
-}
-
-.dark .text-gray-600 {
-  color: #d4cfc7;
-}
-
-.dark .text-gray-500 {
-  color: #b9b4a7;
-}
-
-.dark .text-amber-dark {
-  color: #fcdca1;
-}
-
-/* Buttons and Borders */
-.dark .bg-amber {
-  background-color: #e0a96d !important;
-}
-
-.dark .bg-amber-dark {
-  background-color: #d08a56 !important;
-}
-
-.dark .border {
-  border-color: #4d3f2d !important;
-}
-
-.dark .shadow {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-/* 🧩 Card Helper */
-.card {
-  @apply bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0] p-4 rounded shadow border;
-}
-
-/* 📛 Badge Colors */
-.badge-poem {
-  @apply bg-olive text-white;
-}
-
-.badge-diary {
-  @apply bg-rustic text-white;
-}
-
-.badge-monologue {
-  @apply bg-gold text-white;
-}
-
-.dark .badge-poem {
-  background-color: #4e5e3e;
-}
-
-.dark .badge-diary {
-  background-color: #5c3d2e;
-}
-
-.dark .badge-monologue {
-  background-color: #856a32;
-}
-
-/* 💬 Comment Section */
-.dark .comment-box,
-.dark .reply-box {
-  background-color: #2c261f !important;
-  color: #fefae0 !important;
-}
-
-/* 🧊 Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.dark .glass {
-  background: rgba(40, 38, 32, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-/* ---------- Typography System ---------- */
-
-h1 {
-  font-size: 2.5rem;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-h2 {
-  font-size: 1.8rem;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-}
-
-p {
-  font-size: 1.05rem;
-  line-height: 1.8;
-}
-
-.small-text {
-  font-size: 0.9rem;
-  color: #666;
-}
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem; /* same as gap-10 */
-}
-.card {
-  padding: 2rem;
-  border-radius: 1.5rem;
-}
-.title {
-  color: #111;
-}
-
-html.dark .title {
-  color: #fafafa;
-}
-

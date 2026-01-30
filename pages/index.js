@@ -1,127 +1,149 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import Head from "next/head";
+import FragmentCard from "@/components/FragmentCard";
+import { useAuth } from "@/lib/auth";
+import { FiSearch } from "react-icons/fi";
 
 export default function Home() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState("");
+  const [search, setSearch] = useState("");
+  const [followFeed, setFollowFeed] = useState([]);
 
+  // Fetch Logic (Kept mostly same, just cleaned up)
   useEffect(() => {
     const fetchQuote = async () => {
       const ref = doc(db, "settings", "quoteOfTheDay");
       const snap = await getDoc(ref);
-      if (snap.exists()) {
-        setQuote(snap.data().text);
-      }
+      if (snap.exists()) setQuote(snap.data().text);
     };
     fetchQuote();
-  }, []);
 
-  useEffect(() => {
     const fetchEntries = async () => {
-      const q = query(
-        collection(db, "entries"),
-        where("isPrivate", "==", false),
-        orderBy("timestamp", "desc")
-      );
+      const q = query(collection(db, "entries"), where("isPrivate", "==", false), orderBy("timestamp", "desc"));
       const snapshot = await getDocs(q);
-      const results = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setEntries(results);
+      setEntries(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
     };
-
     fetchEntries();
   }, []);
 
-  const badgeColors = {
-    poem: "badge-poem",
-    diary: "badge-diary",
-    monologue: "badge-monologue",
-  };
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const loadFollowFeed = async () => {
+      const snap = await getDocs(collection(db, "users", currentUser.uid, "following"));
+      const authorIds = snap.docs.map(d => d.id);
+      if (authorIds.length === 0) return;
+      const q = query(collection(db, "entries"), where("uid", "in", authorIds), where("isPrivate", "==", false), orderBy("timestamp", "desc"));
+      const postsSnap = await getDocs(q);
+      setFollowFeed(postsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+    };
+    loadFollowFeed();
+  }, [currentUser]);
+
+  // Search Filter
+  const filteredEntries = entries.filter((e) =>
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
+    e.content.toLowerCase().includes(search.toLowerCase()) ||
+    e.authorName?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <Head>
-        <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556"
-          crossOrigin="anonymous"
-        ></script>
-      </Head>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <Head><title>Fragments of Me</title></Head>
 
-      {/* 📜 Quote Section */}
-      {quote && (
-        <div className="mb-4 text-center italic text-lg sm:text-xl text-gray-700 dark:text-[#d4cfc7] font-serif px-4">
-          “{quote}”
-        </div>
-      )}
+      {/* --- 1. HERO SECTION (Editorial Style) --- */}
+      <div className="relative pt-24 pb-20 text-center">
+        
+        {/* Subtle decorative flourish */}
+        <div className="w-16 h-1 bg-accent/20 mx-auto mb-8 rounded-full"></div>
 
-      {/* ☕ Support Button */}
-      <div className="mb-8 text-center">
-        <a
-          href="https://coff.ee/codewithsalik"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block px-4 py-2 text-sm font-medium bg-accent text-white rounded-full shadow hover:bg-amber-700 transition"
-        >
-          ☕ Buy me a coffee / Support my work
-        </a>
+        <h1 className="text-5xl md:text-8xl font-serif font-black text-ink mb-6 tracking-tight leading-[0.9]">
+          Fragments <br className="sm:hidden" /> <span className="italic text-accent font-light">of</span> Me
+        </h1>
+
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted leading-relaxed mb-10 font-serif antialiased opacity-90">
+          A collection of poems, monologues, and quiet confessions.<br className="hidden md:block"/> 
+          Written to be <span className="italic text-ink font-semibold">felt</span> more than understood.
+        </p>
+
+        {quote && (
+          <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-surface border border-black/5 dark:border-white/5 shadow-sm max-w-2xl mx-auto">
+            <span className="text-4xl text-accent font-serif leading-none h-4 overflow-visible">“</span>
+            <p className="italic text-ink/80 font-serif text-sm md:text-base pr-2 line-clamp-1">{quote}</p>
+          </div>
+        )}
       </div>
 
-      <h1 className="text-3xl font-bold text-accent dark:text-[#fcdca1] mb-6">
-        Latest Fragments
-      </h1>
-
-      {loading ? (
-        <p className="text-center text-gray-500 dark:text-[#b9b4a7]">Loading entries...</p>
-      ) : entries.length === 0 ? (
-        <p className="text-center text-gray-500 dark:text-[#b9b4a7]">No entries yet.</p>
-      ) : (
-        <div className="stack">
-          {entries.map((entry) => (
-            <Link key={entry.id} href={`/entry/${entry.id}`}>
-              <div className="bg-white dark:bg-[#2c261f] text-ink dark:text-[#fefae0] p-6 rounded-xl border-l-4 border-amber-600 shadow-md hover:shadow-lg group transition-all">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-xl font-semibold text-accent dark:text-[#fcdca1] group-hover:underline">
-                    {entry.title}
-                  </h2>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"
-                      }`}
-                  >
-                    {entry?.type?.charAt(0).toUpperCase() + entry?.type?.slice(1) || "Unknown"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">
-                  ✍️ by {entry.authorName}
-                </p>
-
-                <p className="text-sm text-gray-500 dark:text-[#b9b4a7] mb-1">
-                  {entry.timestamp?.toDate().toLocaleDateString()}
-                </p>
-                <p className="text-gray-800 dark:text-[#e9e6da] text-sm leading-relaxed line-clamp-3">
-                  {entry.content.slice(0, 200)}...
-                </p>
-              </div>
-            </Link>
-          ))}
+      {/* --- 2. FLOATING SEARCH BAR --- */}
+      <div className="sticky top-24 z-30 max-w-lg mx-auto mb-20">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-accent/20 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 rounded-full"></div>
+          <div className="relative flex items-center bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-full shadow-lg transition-all focus-within:ring-2 focus-within:ring-accent/50 focus-within:scale-[1.02]">
+            <FiSearch className="ml-5 text-muted text-xl" />
+            <input
+              type="text"
+              placeholder="Search for a feeling..."
+              className="w-full py-4 px-4 bg-transparent text-ink placeholder-muted/70 focus:outline-none text-lg font-medium"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
+      </div>
+
+      {/* --- 3. FOLLOW FEED --- */}
+      {followFeed.length > 0 && (
+        <section className="mb-24">
+          <div className="flex items-center gap-4 mb-10">
+            <h2 className="text-3xl font-serif font-bold text-ink">Following</h2>
+            <div className="h-[1px] flex-grow bg-black/10 dark:bg-white/10"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {followFeed.map((entry, idx) => (
+              <FragmentCard key={entry.id} entry={entry} index={idx} />
+            ))}
+          </div>
+        </section>
       )}
+
+      {/* --- 4. MAIN MASONRY FEED --- */}
+      <section>
+        <div className="flex items-center justify-center mb-12">
+          <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-accent/80 border-b-2 border-accent/20 pb-2">
+            Latest Fragments
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-64 rounded-xl bg-black/5 dark:bg-white/5 animate-pulse"></div>
+            ))}
+          </div>
+        ) : filteredEntries.length === 0 ? (
+          <div className="text-center py-20 opacity-50">
+            <p className="font-serif italic text-2xl">Silence...</p>
+            <p className="text-sm mt-2">No fragments found matching your search.</p>
+          </div>
+        ) : (
+          /* CSS Columns for true Masonry layout */
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+            {filteredEntries.map((entry, idx) => (
+              <div key={entry.id} className="break-inside-avoid mb-8">
+                {/* Pass Index for staggered animation */}
+                <FragmentCard entry={entry} index={idx} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

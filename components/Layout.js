@@ -1,5 +1,5 @@
-// components/Layout.js
 import Header from "./Header";
+import Footer from "./Footer";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import { useEffect, useState } from "react";
@@ -11,15 +11,13 @@ export default function Layout({ children }) {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-  // Show popup after delay if not logged in
   useEffect(() => {
     if (!loading && !user) {
-      const timer = setTimeout(() => setShowModal(true), 800);
+      const timer = setTimeout(() => setShowModal(true), 2000);
       return () => clearTimeout(timer);
     }
   }, [user, loading]);
 
-  // Auto-close modal on route change
   useEffect(() => {
     const handleRouteChange = () => setShowModal(false);
     router.events.on("routeChangeStart", handleRouteChange);
@@ -27,20 +25,20 @@ export default function Layout({ children }) {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-parchment text-ink flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
       <Header />
+
       {showModal && <LoginRegisterModal onClose={() => setShowModal(false)} />}
+
       <main
-        className={`flex-grow max-w-3xl mx-auto pt-16 pb-28 px-6 sm:px-6 lg:px-8 transition-all duration-300 ${showModal ? "blur-sm pointer-events-none select-none" : ""
+        className={`flex-grow w-full transition-opacity duration-500 ${showModal ? "opacity-80" : "opacity-100"
           }`}
       >
+
         {children}
       </main>
-      <footer className="text-center text-xs text-gray-500 py-4 border-t border-amber-light">
-        © {new Date().getFullYear()} Fragments of Me — Crafted by{" "}
-        <span className="font-semibold text-amber-dark">Salik Pirzada</span> @{" "}
-        <span className="text-amber-dark">CodeWithSalik</span>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

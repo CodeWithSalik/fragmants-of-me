@@ -1,15 +1,15 @@
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { collection, query, where, orderBy, getDocs, doc, updateDoc } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/lib/firebase";
+import Head from "next/head";
+import FragmentCard from "@/components/FragmentCard";
+import toast from "react-hot-toast";
 
 export default function Private() {
   const [entries, setEntries] = useState([]);
   const [user] = useAuthState(auth);
-  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -21,77 +21,48 @@ export default function Private() {
         orderBy("timestamp", "desc")
       );
       const snapshot = await getDocs(q);
-      const fetched = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setEntries(fetched);
+      setEntries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
     };
-
     fetchEntries();
   }, [user]);
 
-  const makePublic = async (id) => {
-    try {
-      const ref = doc(db, "entries", id);
-      await updateDoc(ref, { isPrivate: false });
-      setEntries((prev) => prev.filter((e) => e.id !== id));
+  // Allow making public directly from this grid if needed, 
+  // but for now, we just link to the entry page where they can edit it.
 
-      setMessage("✅ Visibility updated. Post is now public.");
-      setTimeout(() => setMessage(""), 3000);
-    } catch (err) {
-      console.error("Error making post public:", err);
-      setMessage("❌ Failed to update visibility.");
-      setTimeout(() => setMessage(""), 3000);
-    }
-  };
+  if (!user) return <div className="min-h-screen flex items-center justify-center text-muted">Please login.</div>;
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto mt-8 px-4">
-      <h1 className="text-3xl font-semibold mb-4 text-amber-dark dark:text-amber-300">Your Private Entries</h1>
-      {message && (
-        <div className="mb-4 px-4 py-2 rounded bg-green-100 border border-green-400 text-green-800 text-sm dark:bg-green-900 dark:text-green-200 dark:border-green-700">
-          {message}
+    <div className="container mx-auto px-4 py-16 max-w-7xl">
+      <Head><title>Private | Fragments of Me</title></Head>
+
+      <div className="text-center mb-16">
+        <div className="w-12 h-1 bg-accent/30 mx-auto mb-6 rounded-full"></div>
+        <h1 className="text-4xl md:text-5xl font-serif font-black text-ink mb-4">
+          Private Journal
+        </h1>
+        <p className="text-muted italic">Fragments visible only to you.</p>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[1,2,3].map(i => <div key={i} className="h-64 rounded-xl bg-black/5 dark:bg-white/5 animate-pulse" />)}
+        </div>
+      ) : entries.length === 0 ? (
+        <p className="text-center text-muted py-20">No private entries found.</p>
+      ) : (
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+          {entries.map((entry, idx) => (
+            <div key={entry.id} className="break-inside-avoid mb-8 relative group">
+              {/* Overlay Badge */}
+              <div className="absolute top-4 right-4 z-20 px-2 py-1 bg-black/50 text-white text-[10px] uppercase font-bold rounded backdrop-blur-md">
+                🔒 Private
+              </div>
+              <FragmentCard entry={entry} index={idx} />
+            </div>
+          ))}
         </div>
       )}
-      {entries.map((entry) => (
-        <div
-          key={entry.id}
-          className="bg-white dark:bg-[#2c261f] p-5 rounded shadow border-l-4 border-amber relative text-ink dark:text-[#fefae0]"
-        >
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-semibold text-ink dark:text-[#fefae0]">{entry.title}</h3>
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${badgeColors[entry.type] || "bg-gray-200 text-gray-800"}`}>
-              {entry.type?.charAt(0).toUpperCase() + entry.type?.slice(1) || "Unknown"}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-[#d4cfc7]">✍️ by {entry.authorName}</p>
-
-          <p className="text-sm text-gray-500 dark:text-[#b9b4a7]">
-            {entry.timestamp?.toDate().toLocaleDateString()}
-          </p>
-
-          <p className="mt-2 text-gray-700 dark:text-[#d4cfc7] line-clamp-3">{entry.content.slice(0, 200)}...</p>
-
-          <div className="mt-4 flex gap-3">
-            <Link href={`/edit/${entry.id}`}>
-              <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                Edit
-              </button>
-            </Link>
-
-            <button
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-              onClick={() => makePublic(entry.id)}
-            >
-              Make Public
-            </button>
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
-
-const badgeColors = {
-  poem: "bg-olive text-white",
-  diary: "bg-rustic text-white",
-  monologue: "bg-gold text-white",
-};

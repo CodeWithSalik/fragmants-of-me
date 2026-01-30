@@ -1,30 +1,57 @@
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
-import { FiUser, FiMenu, FiX } from "react-icons/fi";
+import { FiUser, FiMenu, FiX, FiBell } from "react-icons/fi";
 import { useState, useEffect } from "react";
-import { checkIfAdmin } from "@/lib/checkAdmin";
+import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
+import { createPortal } from "react-dom";
 
 export default function Header() {
-  const [isAdmin, setIsAdmin] = useState(false);
+
   const [user] = useAuthState(auth);
-  const router = useRouter();
+  const [role, setRole] = useState("user");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const router = useRouter();
+
+  const isAdminRoute = router.pathname.startsWith("/admin");
+
+  /* ================= AUTH + ROLE ================= */
 
   useEffect(() => {
-    let active = true;
-    if (user?.uid) {
-      checkIfAdmin(user.uid).then((res) => {
-        if (active) setIsAdmin(res);
-      });
-    } else {
-      setIsAdmin(false);
+    if (!user) {
+      setRole("user");
+      setUnreadCount(0);
+      return;
     }
-    return () => {
-      active = false;
-    };
+
+    getDoc(doc(db, "users", user.uid)).then(s =>
+      s.exists() && setRole(s.data().role || "user")
+    );
+
+    const unsub = onSnapshot(
+      query(
+        collection(db, "users", user.uid, "notifications"),
+        where("read", "==", false)
+      ),
+      (s) => setUnreadCount(s.size)
+    );
+
+    return () => unsub();
   }, [user]);
+
+  /* ================= MENU BEHAVIOR ================= */
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "auto";
+  }, [menuOpen]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [router.asPath]);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
   const handleLogout = () => {
     sessionStorage.removeItem("admin_pin_verified");
@@ -32,88 +59,204 @@ export default function Header() {
     router.push("/");
   };
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
+  /* ================= NAV LINK ================= */
 
-  useEffect(() => {
-    const handleRouteChange = () => setMenuOpen(false);
-    router.events.on("routeChangeStart", handleRouteChange);
-    return () => router.events.off("routeChangeStart", handleRouteChange);
-  }, [router]);
+  const NavLink = ({ href, children, className = "" }) => {
+    const isActive = router.pathname.startsWith(href);
 
-  const linkStyle =
-    "block py-2 px-4 text-sm sm:text-base text-ink dark:text-[#fefae0] hover:text-amber-dark dark:hover:text-[#fcd34d] transition";
+    return (
+      <Link
+        href={href}
+        className={`
+          nav-link
+          text-[13px] font-semibold tracking-[0.12em] uppercase
+          transition-all duration-300
+          py-2 px-2
+          ${isActive ? "text-accent active" : "text-ink hover:text-accent"}
+          ${className}
+        `}
+      >
+        {children}
+      </Link>
+    );
+  };
+
+  /* ================================================= */
 
   return (
-    <header className="bg-parchment dark:bg-[#29241c] border-b border-amber-light dark:border-[#4d3f2d] shadow-md sticky top-0 z-50 transition-colors">
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between sm:justify-start relative">
+    <header className="site-header">
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 z-20 sm:mr-6">
-          <img src="/logo.png" alt="Fragments of Me" className="h-8 sm:h-10" />
-        </Link>
+      {/* ================= TOP BAR ================= */}
 
-        {/* Title on mobile */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 sm:hidden">
-          <span className="text-base italic text-amber-dark dark:text-[#fcdca1] font-semibold">
-            Fragments of Me
-          </span>
+      <div className="container mx-auto px-4 max-w-[90rem] h-16 md:h-24 grid grid-cols-[220px_1fr_220px] items-center">
+
+        {/* LEFT */}
+        <div className="flex items-center justify-start">
+          <Link href="/" className="flex items-center gap-2 w-[200px]">
+            <img
+              src="/logo.png"
+              alt="Fragments"
+              className="h-7 md:h-9 w-auto opacity-90 hover:scale-105 transition-transform"
+            />
+            <span className="hidden lg:block text-xl font-serif font-black tracking-tighter text-ink hover:text-accent transition-colors">
+              Fragments
+            </span>
+          </Link>
         </div>
 
-        {/* Hamburger toggle */}
-        <div className="sm:hidden z-20">
-          <button
-            onClick={toggleMenu}
-            aria-label="Toggle Menu"
-            className="text-2xl text-amber-dark dark:text-[#fcdca1] focus:outline-none"
-          >
+        {/* CENTER NAV */}
+        <nav className="hidden md:flex justify-center items-center gap-14 pl-6">
+
+          {!isAdminRoute ? (
+            <>
+              <NavLink href="/">Home</NavLink>
+              <NavLink href="/poems">Poems</NavLink>
+              <NavLink href="/diary">Diary</NavLink>
+              <NavLink href="/monologues">Monologues</NavLink>
+              <NavLink href="/authors">Authors</NavLink>
+
+              {(role === "author" || role === "admin") && (
+                <>
+                  <NavLink href="/write">Write</NavLink>
+                  <NavLink href="/private">Private</NavLink>
+                </>
+              )}
+
+              {role === "admin" && <NavLink href="/admin">Admin</NavLink>}
+            </>
+          ) : (
+            <>
+              <NavLink href="/">Home</NavLink>
+              <NavLink href="/admin">Admin</NavLink>
+              <NavLink href="/quote">Quote</NavLink>
+
+            </>
+          )}
+
+        </nav>
+
+        {/* RIGHT */}
+        <div className="hidden md:flex justify-end items-center gap-6">
+
+          {user ? (
+            <>
+              <div className="relative">
+                <Link href="/notifications" className="text-ink hover:text-accent">
+                  <FiBell size={20} />
+                </Link>
+
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold h-3 w-3 flex items-center justify-center rounded-full animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+
+              <Link href="/profile" className="text-ink hover:text-accent">
+                <FiUser size={20} />
+              </Link>
+
+              <button
+                onClick={handleLogout}
+                className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-600"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="px-6 py-2 rounded-full bg-ink text-white dark:bg-accent dark:text-black text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+            >
+              Login
+            </Link>
+          )}
+
+        </div>
+
+        {/* MOBILE HAMBURGER */}
+        <div className="md:hidden flex justify-end">
+          <button onClick={toggleMenu} className="text-2xl text-ink hover:text-accent">
             {menuOpen ? <FiX /> : <FiMenu />}
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav
-          className={`${menuOpen ? "max-h-[500px]" : "max-h-0"
-            } sm:max-h-none sm:flex flex-col sm:flex-row overflow-hidden sm:overflow-visible transition-all duration-300 ease-in-out gap-2 sm:gap-6 absolute sm:static top-full left-0 right-0 bg-parchment dark:bg-[#29241c] sm:bg-transparent px-4 sm:px-0 border-t sm:border-none`}
-        >
-          <Link href="/" className={linkStyle}>Home</Link>
-
-          {user && (
-            <>
-              <Link href="/poems" className={linkStyle}>Poems</Link>
-              <Link href="/diary" className={linkStyle}>Diary</Link>
-              <Link href="/monologues" className={linkStyle}>Monologues</Link>
-            </>
-          )}
-
-          {user && (
-            <Link href="/profile" className="text-xl sm:text-base text-ink dark:text-[#fefae0] hover:text-amber-dark dark:hover:text-[#fcd34d] px-4 sm:px-0">
-              <FiUser />
-            </Link>
-          )}
-
-          {isAdmin && (
-            <>
-              <Link href="/write" className={linkStyle}>Write</Link>
-              <Link href="/private" className={linkStyle}>Private</Link>
-              <Link href="/quote" className={linkStyle}>Edit Quote</Link>
-              <Link href="/admin" className={linkStyle}>Admin Panel</Link>
-            </>
-          )}
-
-          {!user ? (
-            <Link href="/login" className="text-amber hover:underline px-4 sm:px-0 text-sm sm:text-base">
-              Login
-            </Link>
-          ) : (
-            <button
-              onClick={handleLogout}
-              className="text-red-500 dark:text-red-400 hover:underline text-sm sm:text-base px-4 sm:px-0"
-            >
-              Logout
-            </button>
-          )}
-        </nav>
       </div>
+
+      {/* ================= MOBILE MENU ================= */}
+
+      {typeof window !== "undefined" &&
+        createPortal(
+
+          <div
+            className={`
+              fixed inset-0 z-[9999]
+              bg-black/30 backdrop-blur-sm
+              flex items-center justify-center
+              transition-all duration-300
+              ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"}
+            `}
+          >
+
+            <div className="aura-card w-[90%] max-w-md">
+              <div className="aura-card-content p-10 flex flex-col items-center gap-8">
+
+                <button
+                  onClick={toggleMenu}
+                  className="absolute top-6 right-6 text-3xl text-ink hover:text-accent"
+                >
+                  <FiX />
+                </button>
+
+                {!isAdminRoute ? (
+                  <>
+                    <NavLink href="/" className="text-xl">Home</NavLink>
+                    <NavLink href="/poems" className="text-xl">Poems</NavLink>
+                    <NavLink href="/diary" className="text-xl">Diary</NavLink>
+                    <NavLink href="/monologues" className="text-xl">Monologues</NavLink>
+                    <NavLink href="/authors" className="text-xl">Authors</NavLink>
+
+                    {(role === "author" || role === "admin") && (
+                      <NavLink href="/write" className="text-xl">Write</NavLink>
+                    )}
+
+                    {role === "admin" && (
+                      <NavLink href="/admin" className="text-xl">Admin</NavLink>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <NavLink href="/" className="text-xl">Home</NavLink>
+                    <NavLink href="/admin" className="text-xl">Admin</NavLink>
+                  </>
+                )}
+
+                <div className="w-12 h-px bg-black/10 dark:bg-white/10 my-2" />
+
+                {user ? (
+                  <>
+                    <Link href="/profile" className="text-lg font-serif text-ink">
+                      My Profile
+                    </Link>
+
+                    <button onClick={handleLogout} className="text-red-500 text-lg font-serif">
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link href="/login" className="btn-primary px-8 py-3">
+                    Login
+                  </Link>
+                )}
+
+              </div>
+            </div>
+
+          </div>,
+          document.body
+        )
+      }
+
     </header>
   );
 }

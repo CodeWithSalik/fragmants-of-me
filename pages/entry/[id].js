@@ -1,17 +1,7 @@
-import AmbientPlayer from "@/components/AmbientPlayer";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { moodThemes } from "@/lib/moodThemes";
 import {
-  getDoc,
-  doc,
-  deleteDoc,
-  updateDoc,
-  collection,
-  getDocs,
-  setDoc,
-  getCountFromServer,
-  serverTimestamp,
+  getDoc, doc, deleteDoc, updateDoc, collection, getDocs, setDoc, getCountFromServer, serverTimestamp
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -20,11 +10,9 @@ import toast from "react-hot-toast";
 import { checkIfAdmin } from "@/lib/checkAdmin";
 import MotionWrap from "@/components/MotionWrap";
 import ReactionLine from "@/components/ReactionLine";
+import { FiHeart, FiBookmark, FiEye, FiEdit2, FiTrash2, FiGlobe, FiLock } from "react-icons/fi";
 
-
-
-
-export default function EntryPage() {
+export default function EntryPage({ setAmbientMood }) {
   const router = useRouter();
   const { id } = router.query;
   const [entry, setEntry] = useState(null);
@@ -33,14 +21,12 @@ export default function EntryPage() {
 
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
-  const [viewsCount, setViewsCount] = useState(0); // 👁️ NEW
+  const [viewsCount, setViewsCount] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    if (user?.uid) {
-      checkIfAdmin(user.uid).then(setIsAdmin);
-    } else {
-      setIsAdmin(false);
-    }
+    if (user?.uid) checkIfAdmin(user.uid).then(setIsAdmin);
+    else setIsAdmin(false);
   }, [user]);
 
   useEffect(() => {
@@ -48,176 +34,171 @@ export default function EntryPage() {
     const loadEntry = async () => {
       const ref = doc(db, "entries", id);
       const snap = await getDoc(ref);
-      if (snap.exists()) setEntry({ id: snap.id, ...snap.data() });
+      if (snap.exists()) {
+        const data = snap.data();
+        setEntry({ id: snap.id, ...data });
+        if (setAmbientMood) setAmbientMood(data.mood || "warm");
+      }
     };
     loadEntry();
-  }, [id]);
+  }, [id, setAmbientMood]);
 
   useEffect(() => {
-    if (!entry || !user) return;
-
-    const fetchLikes = async () => {
+    if (!entry) return;
+    const loadStats = async () => {
       const likesRef = collection(db, "entries", entry.id, "likes");
       const likesSnap = await getDocs(likesRef);
       setLikesCount(likesSnap.size);
-      setHasLiked(likesSnap.docs.some(doc => doc.id === user.uid));
-    };
-
-    fetchLikes();
-  }, [entry, user]);
-
-  // 👁️ Record a view (one per user)
-  useEffect(() => {
-    const trackView = async () => {
-      if (!entry || !user) return;
-
-      const viewRef = doc(db, "entries", entry.id, "views", user.uid);
-      await setDoc(viewRef, { timestamp: serverTimestamp() }, { merge: true });
-    };
-    trackView();
-  }, [entry, user]);
-
-  // 👁️ Fetch views count
-  useEffect(() => {
-    const fetchViews = async () => {
-      if (!entry) return;
+      if (user) setHasLiked(likesSnap.docs.some(d => d.id === user.uid));
 
       const viewsRef = collection(db, "entries", entry.id, "views");
-      const snapshot = await getCountFromServer(viewsRef);
-      setViewsCount(snapshot.data().count);
+      const viewsSnap = await getCountFromServer(viewsRef);
+      setViewsCount(viewsSnap.data().count);
+
+      if (user) {
+        const savedRef = doc(db, "users", user.uid, "saved", entry.id);
+        const savedSnap = await getDoc(savedRef);
+        setIsSaved(savedSnap.exists());
+      }
     };
-    fetchViews();
-  }, [entry]);
+    loadStats();
+  }, [entry, user]);
+
+  useEffect(() => {
+    if (!entry || !user) return;
+    const viewRef = doc(db, "entries", entry.id, "views", user.uid);
+    setDoc(viewRef, { timestamp: serverTimestamp() }, { merge: true });
+  }, [entry, user]);
+
+  const toggleLike = async () => {
+    if (!user) return toast.error("Please login to like");
+    const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
+    if (hasLiked) {
+      await deleteDoc(likeRef);
+      setHasLiked(false);
+      setLikesCount(p => p - 1);
+    } else {
+      await setDoc(likeRef, { createdAt: new Date(), uid: user.uid, name: user.displayName });
+      setHasLiked(true);
+      setLikesCount(p => p + 1);
+    }
+  };
+
+  const toggleSave = async () => {
+    if (!user) return toast.error("Please login to save");
+    const ref = doc(db, "users", user.uid, "saved", entry.id);
+    if (isSaved) {
+      await deleteDoc(ref);
+      setIsSaved(false);
+      toast.success("Removed from saved");
+    } else {
+      await setDoc(ref, { savedAt: serverTimestamp() });
+      setIsSaved(true);
+      toast.success("Saved to collection");
+    }
+  };
 
   const handleDelete = async () => {
-    if (confirm("Delete this entry?")) {
+    if (confirm("Permanently delete this fragment?")) {
       await deleteDoc(doc(db, "entries", id));
-      toast.error("Entry Deleted!");
+      toast.success("Deleted");
       router.push("/");
     }
   };
 
   const togglePrivacy = async () => {
-    const ref = doc(db, "entries", id);
-    await updateDoc(ref, {
-      isPrivate: !entry.isPrivate,
-    });
-    alert("Updated visibility");
+    await updateDoc(doc(db, "entries", id), { isPrivate: !entry.isPrivate });
     setEntry({ ...entry, isPrivate: !entry.isPrivate });
+    toast.success(entry.isPrivate ? "Now Public" : "Now Private");
   };
 
-  const toggleLike = async () => {
-    if (!user || !entry) return;
+  if (!entry) return <div className="min-h-screen flex items-center justify-center text-muted">Loading fragment...</div>;
 
-    const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
-
-    if (hasLiked) {
-      await deleteDoc(likeRef);
-      setHasLiked(false);
-      setLikesCount(prev => prev - 1);
-    } else {
-      await setDoc(likeRef, {
-        createdAt: new Date(),
-        name: user.displayName || "Anonymous",
-        email: user.email || "",
-        uid: user.uid,
-      });
-      setHasLiked(true);
-      setLikesCount(prev => prev + 1);
-    }
-  };
-
-
-  if (!entry) return <div className="p-6">Loading...</div>;
+  const isAuthor = user && entry.uid === user.uid;
 
   return (
-    <>
-      <AmbientPlayer mood={entry.mood} />
-      <div className={`${moodThemes[entry.mood] || moodThemes.warm} min-h-screen px-6 py-10`}>
-        <div className="max-w-3xl mx-auto">
-
+    <div className="container mx-auto px-4 py-12 max-w-2xl">
+      
+      <div className="aura-card reading-mode">
+        <div className="aura-card-content p-8 md:p-12">
+          
           <MotionWrap>
-            <h1 className="title text-4xl md:text-5xl font-semibold tracking-tight mb-2">
-
-
-              {entry.title}
-            </h1>
-          </MotionWrap>
-
-          <p className="small-text">✍️ by {entry.authorName}</p>
-
-          <p className="small-text
-">
-            {entry.timestamp?.toDate().toLocaleDateString()} — {entry.type}
-          </p>
-
-          <MotionWrap delay={0.15}>
-            <div className="prose prose-amber mb-6 whitespace-pre-wrap glass p-6">
-
-              {entry.content.split("\n").map((line, i) => (
-                <ReactionLine
-                  key={i}
-                  entryId={entry.id}
-                  lineIndex={i}
-                  text={line}
-                />
-              ))}
-
-            </div>
-          </MotionWrap>
-
-
-          {user && (
-            <div className="flex items-center gap-4 mt-6">
-              <button onClick={toggleLike} className="text-2xl">
-                {hasLiked ? "❤️" : "🤍"}
-              </button>
-              <span className="text-sm text-gray-700">
-                {likesCount} {likesCount === 1 ? "like" : "likes"}
-              </span>
-
-              <span className="text-sm text-gray-700">
-                👁 {viewsCount} {viewsCount === 1 ? "view" : "views"}
-              </span>
-              <div className="mb-8 text-center">
-                <a
-                  href="https://coff.ee/codewithsalik"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-4 py-2 text-sm font-medium bg-accent text-white rounded-full shadow hover:bg-amber-700 transition"
-                >
-                  ☕ Buy me a coffee / Support my work
-                </a>
+            {/* Header Metadata */}
+            <div className="flex justify-between items-start mb-8 border-b border-black/5 dark:border-white/5 pb-6">
+              <div>
+                <h1 className="hero-title text-3xl md:text-4xl text-ink mb-3 leading-tight">
+                  {entry.title}
+                </h1>
+                <div className="flex items-center gap-2 text-sm text-muted font-medium">
+                  <span>By {entry.authorName}</span>
+                  <span>•</span>
+                  <span>{entry.timestamp?.toDate().toLocaleDateString()}</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-end gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-ink/5 text-ink/70">
+                  {entry.type}
+                </span>
+                {entry.mood && (
+                  <span className="text-xs text-muted/60 italic capitalize">
+                    {entry.mood} mood
+                  </span>
+                )}
               </div>
             </div>
-          )}
 
-          <CommentSection entryId={entry.id} />
-
-          {isAdmin && (
-            <div className="flex gap-4 mt-6 text-sm">
-              <button
-                onClick={() => router.push(`/edit/${entry.id}`)}
-                className="text-blue-600 hover:underline"
-              >
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
-              <button
-                onClick={togglePrivacy}
-                className="text-accent hover:underline"
-              >
-                Make {entry.isPrivate ? "Public" : "Private"}
-              </button>
+            {/* CONTENT */}
+            <div className="prose prose-lg prose-p:text-ink/90 prose-p:font-serif prose-p:leading-loose max-w-none mb-12">
+              {entry.content.split("\n").map((line, i) => (
+                <ReactionLine key={i} entryId={entry.id} lineIndex={i} text={line} />
+              ))}
             </div>
-          )}
+
+            {/* Footer Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-black/5 dark:border-white/5">
+              <div className="flex items-center gap-6">
+                <button onClick={toggleLike} className={`flex items-center gap-2 transition-colors ${hasLiked ? "text-red-500" : "text-muted hover:text-red-500"}`}>
+                  <FiHeart className={hasLiked ? "fill-current" : ""} size={20} />
+                  <span className="text-sm font-semibold">{likesCount}</span>
+                </button>
+                <button onClick={toggleSave} className={`flex items-center gap-2 transition-colors ${isSaved ? "text-accent" : "text-muted hover:text-accent"}`}>
+                  <FiBookmark className={isSaved ? "fill-current" : ""} size={20} />
+                  <span className="text-sm font-semibold">{isSaved ? "Saved" : "Save"}</span>
+                </button>
+                <div className="flex items-center gap-2 text-muted cursor-default" title="Total Views">
+                  <FiEye size={20} />
+                  <span className="text-sm font-semibold">{viewsCount}</span>
+                </div>
+              </div>
+              <a href="https://coff.ee/codewithsalik" target="_blank" rel="noopener noreferrer" className="text-xs font-bold uppercase tracking-widest text-accent hover:text-accent-strong transition-colors">
+                ☕ Support Author
+              </a>
+            </div>
+          </MotionWrap>
+
         </div>
       </div>
-    </>
+
+      {/* 2. Admin & Author Controls (FIXED VISIBILITY) */}
+      {(isAdmin || isAuthor) && (
+        <div className="mt-6 flex justify-end gap-3 opacity-70 hover:opacity-100 transition-opacity">
+          <button onClick={() => router.push(`/edit/${entry.id}`)} className="text-sm text-blue-500 hover:underline flex items-center gap-2">
+            <FiEdit2 /> Edit
+          </button>
+          <button onClick={togglePrivacy} className="text-sm text-amber-500 hover:underline flex items-center gap-2">
+            {entry.isPrivate ? <FiLock /> : <FiGlobe />} {entry.isPrivate ? "Make Public" : "Make Private"}
+          </button>
+          <button onClick={handleDelete} className="text-sm text-red-500 hover:underline flex items-center gap-2">
+            <FiTrash2 /> Delete
+          </button>
+        </div>
+      )}
+
+      {/* Comments */}
+      <div className="mt-12">
+        <CommentSection entryId={entry.id} />
+      </div>
+    </div>
   );
 }
