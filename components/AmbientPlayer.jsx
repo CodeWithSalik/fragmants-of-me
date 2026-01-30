@@ -4,10 +4,10 @@ import { FiMusic, FiVolume2, FiVolumeX } from "react-icons/fi";
 // Default public audio for testing. Replace with your local files:
 // warm: "/audio/warm.mp3", etc.
 const moodAudio = {
-  warm: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=forest-wind-and-birds-6881.mp3",
-  soft: "https://cdn.pixabay.com/download/audio/2022/03/09/audio_c8c8a73467.mp3?filename=soft-rain-ambient-111163.mp3",
-  melancholic: "https://cdn.pixabay.com/download/audio/2021/11/23/audio_035a336ce6.mp3?filename=sad-piano-111979.mp3",
-  dark: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=dark-drone-ambient-14787.mp3",
+  warm: "/audio/warm.mp3",
+  soft: "/audio/soft.mp3",
+  melancholic: "/audio/melancholic.mp3",
+  dark: "/audio/dark.mp3",
 };
 
 export default function AmbientPlayer({ mood = "warm" }) {
