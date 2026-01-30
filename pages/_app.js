@@ -9,6 +9,8 @@ import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
+import Script from "next/script";
+
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -32,6 +34,19 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+      <Script
+        strategy="afterInteractive"
+        src="https://www.googletagmanager.com/gtag/js?id=G-PC07YVN071"
+      />
+
+      <Script id="ga-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-PC07YVN071');
+        `}
+      </Script>
       <Head>
         <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556" crossOrigin="anonymous"></script>

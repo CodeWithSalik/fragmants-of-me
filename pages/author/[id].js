@@ -6,7 +6,10 @@ import { doc, getDoc, collection, query, where, getDocs, setDoc, deleteDoc, serv
 import FragmentCard from "@/components/FragmentCard";
 import Head from "next/head";
 
+
+
 export async function getServerSideProps({ params }) {
+  
   const authorSnap = await getDoc(doc(db, "authors", params.id));
   
   if (!authorSnap.exists()) {
@@ -55,6 +58,7 @@ export default function AuthorProfile({ author, posts }) {
   const router = useRouter();
   const [user] = useAuthState(auth);
   const [following, setFollowing] = useState(false);
+  
 
   useEffect(() => {
     if (!user || !author.id) return;
