@@ -88,24 +88,22 @@ export default function Header() {
 
       {/* ================= TOP BAR ================= */}
 
-      <div className="container mx-auto px-4 max-w-[90rem] h-16 md:h-24 grid grid-cols-[220px_1fr_220px] items-center">
+      <div className="container mx-auto px-4 max-w-[90rem] h-16 md:h-24 flex items-center justify-between">
 
-        {/* LEFT */}
-        <div className="flex items-center justify-start">
-          <Link href="/" className="flex items-center gap-2 w-[200px]">
-            <img
-              src="/logo.png"
-              alt="Fragments"
-              className="h-7 md:h-9 w-auto opacity-90 hover:scale-105 transition-transform"
-            />
-            <span className="hidden lg:block text-xl font-serif font-black tracking-tighter text-ink hover:text-accent transition-colors">
-              Fragments
-            </span>
-          </Link>
-        </div>
+        {/* LOGO */}
+        <Link href="/" className="flex items-center gap-2 shrink-0">
+          <img
+            src="/logo.png"
+            alt="Fragments"
+            className="h-8 md:h-9 w-auto opacity-90 hover:scale-105 transition-transform"
+          />
+          <span className="block text-lg md:text-xl font-serif font-black tracking-tight text-ink hover:text-accent transition-colors">
+            Fragments
+          </span>
+        </Link>
 
-        {/* CENTER NAV */}
-        <nav className="hidden md:flex justify-center items-center gap-14 pl-6">
+        {/* DESKTOP NAV */}
+        <nav className="hidden md:flex justify-center items-center gap-12">
 
           {!isAdminRoute ? (
             <>
@@ -129,14 +127,13 @@ export default function Header() {
               <NavLink href="/">Home</NavLink>
               <NavLink href="/admin">Admin</NavLink>
               <NavLink href="/quote">Quote</NavLink>
-
             </>
           )}
 
         </nav>
 
-        {/* RIGHT */}
-        <div className="hidden md:flex justify-end items-center gap-6">
+        {/* RIGHT ICONS (DESKTOP) */}
+        <div className="hidden md:flex items-center gap-6">
 
           {user ? (
             <>
@@ -175,8 +172,11 @@ export default function Header() {
         </div>
 
         {/* MOBILE HAMBURGER */}
-        <div className="md:hidden flex justify-end">
-          <button onClick={toggleMenu} className="text-2xl text-ink hover:text-accent">
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={toggleMenu}
+            className="text-2xl text-ink hover:text-accent p-2 rounded-lg active:scale-95 transition"
+          >
             {menuOpen ? <FiX /> : <FiMenu />}
           </button>
         </div>
