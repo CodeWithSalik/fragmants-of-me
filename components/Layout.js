@@ -4,7 +4,12 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import LoginRegisterModal from "./LoginRegisterModal";
+import dynamic from "next/dynamic";
+
+const LoginRegisterModal = dynamic(
+  () => import("./LoginRegisterModal"),
+  { ssr: false }
+);
 
 export default function Layout({ children }) {
   const [user, loading] = useAuthState(auth);

@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const MotionDiv = dynamic(
+  () => import("framer-motion").then(m => m.motion.div),
+  { ssr: false }
+);
 
 export default function FragmentCard({ entry, index = 0 }) {
   
@@ -9,8 +14,10 @@ export default function FragmentCard({ entry, index = 0 }) {
     monologue: "bg-rose-900/10 text-rose-900 dark:text-rose-400 dark:bg-rose-400/10 border-rose-900/10",
   };
 
+
   return (
-    <motion.div
+    <MotionDiv
+
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
@@ -67,6 +74,7 @@ export default function FragmentCard({ entry, index = 0 }) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </MotionDiv>
+
   );
 }

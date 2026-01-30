@@ -1,6 +1,10 @@
 /* eslint-disable react/no-unescaped-entities */
 import Link from "next/link";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+const motion = dynamic(() =>
+  import("framer-motion").then(m => m.motion),
+  { ssr: false }
+);
 import Head from "next/head";
 
 export default function Custom404() {

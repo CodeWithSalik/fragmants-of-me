@@ -48,17 +48,13 @@ html {
   letter-spacing: 0.01em; 
   
   /* Grain Texture */
-  background: 
-    radial-gradient(circle at 50% 0%, #fffbf0 0%, #f7f4e8 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
-  background-attachment: fixed;
+  background: radial-gradient(circle at 50% 0%, #fffbf0 0%, #f7f4e8 100%);
+  /* background-attachment: fixed; */
   background-blend-mode: soft-light;
 }
 
 html.dark {
-  background: 
-    radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.07'/%3E%3C/svg%3E");
+  background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 100%);
   background-blend-mode: overlay;
 }
 
@@ -137,12 +133,12 @@ body { margin: 0; min-height: 100vh; background: transparent; }
   background: linear-gradient(135deg, var(--aura-1), var(--aura-2), var(--aura-3), var(--aura-1));
   background-size: 300% 300%;
   filter: blur(16px); opacity: 0.3;
-  animation: auraFlow 12s ease infinite;
+  animation: none;
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
 .dark .aura-card::before { opacity: 0.45; filter: blur(20px); }
 
-.aura-card:not(.reading-mode):hover { transform: scale(1.02) translateY(-4px); z-index: 10; }
+.aura-card:not(.reading-mode):hover { transform: translateY(-2px); }
 .aura-card:not(.reading-mode):active { transform: scale(0.98); }
 .aura-card:not(.reading-mode):hover::before { opacity: 0.7; filter: blur(24px); }
 
@@ -196,7 +192,7 @@ input, textarea, select {
   z-index: 60;
   width: 100%;
   background: rgba(255,255,255,0.78);
-  backdrop-filter: blur(24px) saturate(120%);
+  backdrop-filter: none;
   border-bottom: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 10px 30px rgba(0,0,0,0.04);
   transition: all 0.3s ease;
@@ -213,3 +209,33 @@ input, textarea, select {
 body {
   overflow-x: hidden;
 }
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* LIGHT MODE GRAIN */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("/grain.png");
+  background-repeat: repeat;
+  opacity: 0.25;   /* stronger for light */
+  z-index: 0;
+}
+
+/* DARK MODE GRAIN */
+.dark body::before {
+  opacity: 0.08;   /* softer for dark */
+}
+
+
+#__next {
+  position: relative;
+  z-index: 1;
+}
+
+

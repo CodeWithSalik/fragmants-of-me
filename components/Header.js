@@ -6,7 +6,7 @@ import { FiUser, FiMenu, FiX, FiBell } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
-
+import Image from "next/image";
 export default function Header() {
 
   const [user] = useAuthState(auth);
@@ -92,10 +92,12 @@ export default function Header() {
 
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <img
+          <Image
             src="/logo.png"
             alt="Fragments"
-            className="h-8 md:h-9 w-auto opacity-90 hover:scale-105 transition-transform"
+            width={36}
+            height={36}
+            priority
           />
           <span className="block text-lg md:text-xl font-serif font-black tracking-tight text-ink hover:text-accent transition-colors">
             Fragments
@@ -191,7 +193,8 @@ export default function Header() {
           <div
             className={`
               fixed inset-0 z-[9999]
-              bg-black/30 backdrop-blur-sm
+              bg-black/40
+
               flex items-center justify-center
               transition-all duration-300
               ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"}
