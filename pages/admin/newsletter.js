@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
-import { sendNewsletter } from "@/lib/admin/sendNewsletter";
 import AdminLayout from "@/components/admin/AdminLayout";
 import toast from "react-hot-toast";
 

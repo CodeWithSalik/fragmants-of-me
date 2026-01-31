@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: true,
-  compress: true,
-  eslint: { ignoreDuringBuilds: true },
-  reactStrictMode: false,
-}
+  reactStrictMode: true,
+  // swcMinify is now default in Next 16, so we remove the line
+  // eslint config is handled automatically now
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
