@@ -3,18 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "dev": "next dev",
+  "build": "next build",
+  "postbuild": "next-sitemap", 
+  "start": "next start",
+  "lint": "next lint"
+},
   "dependencies": {
+    "@react-email/components": "^1.0.6",
     "date-fns": "^4.1.0",
     "eslint": "9.29.0",
     "eslint-config-next": "15.3.4",
     "firebase": "^11.9.1",
     "framer-motion": "^12.18.1",
     "next": "^16.1.6",
+    "next-sitemap": "^4.2.3",
+    "nodemailer": "^7.0.13",
     "react": "19.1.0",
     "react-datepicker": "^8.4.0",
     "react-dom": "19.1.0",

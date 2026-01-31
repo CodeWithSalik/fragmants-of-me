@@ -11,21 +11,20 @@ export default async function handler(req, res) {
     const htmlContent = renderToStaticMarkup(
       <EmailTemplate 
         name={name} 
-        content="Thank you for joining our circle. Your account is now active. We hope you find peace in these fragments." 
+        content="We were moved by your writing sample. Your account has been upgraded to 'Author' status. You can now compose and publish your own fragments." 
       />
     );
 
-    // Await is critical for Vercel/Cloud functions
     await transporter.sendMail({
       ...mailOptions,
       to: email,
-      subject: `Welcome to Fragments, ${name}`,
+      subject: "You are now an Author",
       html: htmlContent,
     });
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Welcome Email Error:", error);
+    console.error("Author Approval Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }

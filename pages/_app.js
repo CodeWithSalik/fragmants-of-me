@@ -11,7 +11,6 @@ import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
 import Script from "next/script";
 
-
 export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [showControls, setShowControls] = useState(false);
@@ -19,8 +18,6 @@ export default function App({ Component, pageProps }) {
 
   useEffect(() => {
     pingBackend();
-
-    // FIX: Always show controls so music/theme works on Entry pages too
     setShowControls(true); 
 
     const root = document.documentElement;
@@ -47,10 +44,17 @@ export default function App({ Component, pageProps }) {
           gtag('config', 'G-PC07YVN071');
         `}
       </Script>
+      
+      {/* --- ADSENSE INTEGRATION --- */}
       <Head>
-        <meta name="google-adsense-account" content="ca-pub-3631011011308556" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3631011011308556" crossOrigin="anonymous"></script>
+        <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
+        <script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4872587981884740" 
+          crossOrigin="anonymous"
+        ></script>
       </Head>
+      {/* --------------------------- */}
 
       <div className="aura" />
 
@@ -67,7 +71,6 @@ export default function App({ Component, pageProps }) {
         }}
       />
 
-      {/* Floating Controls */}
       {showControls && (
         <>
           <DarkModeToggle />

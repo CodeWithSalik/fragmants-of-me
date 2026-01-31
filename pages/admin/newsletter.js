@@ -18,18 +18,31 @@ export default function NewsletterPage() {
     if (!loading && !user) router.push("/");
   }, [user, loading, router]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!subject.trim() || !message.trim()) return toast.error("Fill all fields");
-    
-    setSending(true);
-    try {
-      await sendNewsletter(subject, message);
-      toast.success("Newsletter Sent!");
-      setSubject(""); setMessage("");
-    } catch (err) { toast.error("Failed to send"); }
-    finally { setSending(false); }
-  };
+const handleSend = async (e) => {
+  e.preventDefault();
+  if (!subject.trim() || !message.trim()) return toast.error("Fill all fields");
+  
+  setSending(true);
+  try {
+    // 1. Fetch all user emails from Firestore
+    const userSnap = await getDocs(collection(db, "users"));
+    const emails = userSnap.docs.map(doc => doc.data().email).filter(Boolean);
+
+    // 2. Call the Resend broadcast API
+    await fetch("/api/newsletter-broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject, message, recipients: emails }),
+    });
+
+    toast.success("Broadcast Sent via Resend!");
+    setSubject(""); setMessage("");
+  } catch (err) { 
+    toast.error("Broadcast failed"); 
+  } finally { 
+    setSending(false); 
+  }
+};
 
   const insert = (tag) => setMessage(prev => prev + tag);
 

@@ -16,13 +16,20 @@ export default function AuthorRequests() {
 
   const handleDecision = async (req, status) => {
     await updateDoc(doc(db, "authorRequests", req.id), { status, reviewedAt: serverTimestamp() });
-    
+
+    // Update handleDecision in pages/admin/authors.js
     if (status === "approved") {
       await updateDoc(doc(db, "users", req.uid), { role: "author" });
       await setDoc(doc(db, "authors", req.uid), { name: req.name, bio: req.bio, joinedAt: serverTimestamp() });
-      toast.success("Author Approved");
-    } else {
-      toast.success("Request Rejected");
+
+      // Trigger Resend Notification
+      await fetch("/api/author-approved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: req.name, email: req.email }),
+      });
+
+      toast.success("Author Approved and Notified");
     }
     load();
   };
@@ -40,17 +47,17 @@ export default function AuthorRequests() {
               <div key={r.id} className="aura-card reading-mode">
                 <div className="aura-card-content p-6">
                   <div className="flex flex-col md:flex-row justify-between gap-6">
-                    
+
                     <div className="space-y-3 flex-grow">
                       <div>
                         <h2 className="text-xl font-bold text-ink">{r.name}</h2>
                         <p className="text-xs text-muted uppercase tracking-widest">{r.email}</p>
                       </div>
-                      
+
                       <div className="p-4 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5">
                         <p className="text-xs font-bold text-accent mb-1">BIO</p>
                         <p className="text-sm italic mb-4">{r.bio}</p>
-                        
+
                         <p className="text-xs font-bold text-accent mb-1">SAMPLE</p>
                         <p className="text-sm font-serif leading-relaxed opacity-80 whitespace-pre-wrap">{r.sample}</p>
                       </div>

@@ -34,14 +34,15 @@ export default function Register() {
       await updateProfile(userCred.user, { displayName: name });
 
       // Send Welcome Email (Backend Hook)
-      try {
-        await fetch("https://newyear-backend.onrender.com/send-welcome", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, name }),
-        });
-      } catch (err) { console.error("Email failed", err); }
-
+try {
+  await fetch("/api/send-welcome", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, name }),
+  });
+} catch (err) { 
+  console.error("Resend welcome email failed", err); 
+}
       toast.success("Account created.");
       router.push("/");
     } catch (err) {

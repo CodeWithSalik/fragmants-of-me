@@ -5,11 +5,17 @@ export default function Footer() {
   return (
     <footer className="w-full border-t border-black/5 dark:border-white/5 py-12 mt-20 bg-white/40 dark:bg-black/20 backdrop-blur-sm">
       <div className="container mx-auto px-6 max-w-7xl flex flex-col md:flex-row justify-between items-center gap-8">
-        
+
         {/* Brand */}
         <div className="text-center md:text-left">
           <h3 className="text-lg font-serif font-bold text-ink mb-1">Fragments of Me</h3>
           <p className="text-xs text-muted uppercase tracking-widest">CodeWithSalik © {new Date().getFullYear()}</p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-6 text-xs font-bold text-muted/80 uppercase tracking-widest">
+          <Link href="/about" className="hover:text-accent">About</Link>
+          <Link href="/privacy" className="hover:text-accent">Privacy</Link>
+          <Link href="/terms" className="hover:text-accent">Terms</Link>
+          <Link href="/contact" className="hover:text-accent">Contact</Link>
         </div>
 
         {/* Links */}
