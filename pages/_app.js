@@ -53,7 +53,8 @@ export default function App({ Component, pageProps }) {
       />
 
       {/* --- ADSENSE INTEGRATION --- */}
-      <Head>
+      <Head>\=
+        <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" />
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
         <script
           async
