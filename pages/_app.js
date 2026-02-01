@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import Layout from "@/components/Layout";
-import { pingBackend } from "@/lib/pingBackend";
+// REMOVED: import { pingBackend } from "@/lib/pingBackend"; 
 import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
@@ -17,7 +17,7 @@ export default function App({ Component, pageProps }) {
   const [ambientMood, setAmbientMood] = useState("warm");
 
   useEffect(() => {
-    pingBackend();
+    // REMOVED: pingBackend(); 
     setShowControls(true);
 
     const root = document.documentElement;
@@ -45,7 +45,7 @@ export default function App({ Component, pageProps }) {
         `}
       </Script>
 
-      {/* --- ADSTERRA SOCIAL BAR (Updated Strategy) --- */}
+      {/* --- ADSTERRA SOCIAL BAR --- */}
       <Script 
         src="https://pl28622114.effectivegatecpm.com/02/6b/23/026b2358b3ab017ec68abf3e0a32f689.js"
         strategy="lazyOnload" 
@@ -53,9 +53,7 @@ export default function App({ Component, pageProps }) {
 
       {/* --- ADSENSE & VERIFICATION --- */}
       <Head>
-        {/* ✅ VERIFICATION TAG */}
         <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" />
-        
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
         <script
           async
@@ -66,7 +64,6 @@ export default function App({ Component, pageProps }) {
 
       <div className="aura" />
 
-      {/* ... Rest of your application ... */}
       <Toaster
         position="top-center"
         toastOptions={{

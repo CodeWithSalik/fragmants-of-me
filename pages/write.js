@@ -42,37 +42,50 @@ export default function WritePage() {
     return () => unsub();
   }, [router]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim() || !authorName) return toast.error("Please fill all fields.");
+ // ... existing imports
 
-    try {
-      const entryRef = await addDoc(collection(db, "entries"), {
-        title: title.trim(),
-        content: content.trim(),
-        type,
-        isPrivate,
-        timestamp: selectedDate,
-        uid: user.uid,
+// Inside pages/write.js
+// ... existing imports
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!title.trim() || !content.trim() || !authorName) return toast.error("Please fill all fields.");
+
+  try {
+    // 1. Create Entry
+    const entryRef = await addDoc(collection(db, "entries"), {
+      title: title.trim(),
+      content: content.trim(),
+      type,
+      isPrivate,
+      timestamp: selectedDate,
+      uid: user.uid,
+      authorName,
+      mood
+    });
+
+    // 2. Trigger "Notify All" API (In-App + Email)
+    // We do not await this to keep the UI fast
+    fetch("/api/notify-new-post", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
         authorName,
-        mood
-      });
+        entryId: entryRef.id,
+        authorId: user.uid
+      })
+    });
 
-      // Notify Followers (Simplified for brevity)
-      const followersSnap = await getDocs(collection(db, "authors", user.uid, "followers"));
-      followersSnap.docs.forEach(async (f) => {
-        await addDoc(collection(db, "users", f.id, "notifications"), {
-          type: "new_post", authorId: user.uid, entryId: entryRef.id, title, createdAt: serverTimestamp(), read: false
-        });
-      });
+    toast.success("✅ Published successfully!");
+    router.push(`/entry/${entryRef.id}`);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to publish");
+  }
+};
 
-      toast.success("✅ Published successfully!");
-      router.push(`/entry/${entryRef.id}`);
-    } catch (err) {
-      toast.error("Failed to publish");
-    }
-  };
-
+// ... rest of the component
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted">Verifying credentials...</div>;
 
   return (

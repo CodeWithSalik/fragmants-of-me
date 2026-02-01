@@ -5,11 +5,19 @@ export default async function handler(req, res) {
   
   const { subject, message, recipients } = req.body;
 
+  // 1. Validation Logging
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    console.error("❌ Broadcast Error: 'recipients' list is empty or invalid.");
+    return res.status(400).json({ error: "No recipients found. Check if you have users in the database." });
+  }
+
   try {
-    // Send using BCC to protect privacy
+    console.log(`📧 Attempting to send to ${recipients.length} recipients...`);
+
+    // 2. Send Mail
     await transporter.sendMail({
       ...mailOptions,
-      bcc: recipients, 
+      bcc: recipients, // Use BCC to hide emails from each other
       subject: subject,
       html: `<div style="font-family: 'Georgia', serif; color: #2b2118; line-height: 1.6; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #b45309; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Fragments of Me</h1>
@@ -21,9 +29,14 @@ export default async function handler(req, res) {
       </div>`,
     });
 
+    console.log("✅ Broadcast sent successfully.");
     return res.status(200).json({ success: true });
+
   } catch (err) {
-    console.error("Broadcast Error:", err);
-    return res.status(500).json({ error: "Broadcast failed" });
+    // 3. Log the REAL error
+    console.error("❌ Nodemailer Error:", err); 
+    
+    // Return the specific error message to the frontend
+    return res.status(500).json({ error: err.message || "Email server failed" });
   }
 }
