@@ -9,7 +9,7 @@ import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
-import Script from "next/script"; // Keeps your site fast
+import Script from "next/script";
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -45,16 +45,18 @@ export default function App({ Component, pageProps }) {
         `}
       </Script>
 
-      {/* --- CPM / ADSTERRA ADS (Fixed) --- */}
-      {/* We use Next.js Script component here to prevent it from slowing down the page */}
-      <Script 
+      {/* --- CPM ADS (TEMPORARILY DISABLED FOR ADSENSE REVIEW) --- */}
+      {/* <Script 
         src="https://pl28622114.effectivegatecpm.com/02/6b/23/026b2358b3ab017ec68abf3e0a32f689.js"
         strategy="afterInteractive"
       />
+      */}
 
-      {/* --- ADSENSE INTEGRATION --- */}
+      {/* --- ADSENSE & VERIFICATION --- */}
       <Head>
-        {/* <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" /> */}
+        {/* FIX: Removed the comment characters so this tag actually works */}
+        <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" />
+        
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
         <script
           async
@@ -101,4 +103,4 @@ export default function App({ Component, pageProps }) {
       </Layout>
     </AuthProvider>
   );
-}
+}  
