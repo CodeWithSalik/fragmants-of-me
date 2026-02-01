@@ -46,11 +46,11 @@ export default function App({ Component, pageProps }) {
       </Script>
 
       {/* --- CPM ADS (TEMPORARILY DISABLED FOR ADSENSE REVIEW) --- */}
-      {/* <Script 
+      <Script 
         src="https://pl28622114.effectivegatecpm.com/02/6b/23/026b2358b3ab017ec68abf3e0a32f689.js"
         strategy="afterInteractive"
       />
-      */}
+     
 
       {/* --- ADSENSE & VERIFICATION --- */}
       <Head>
