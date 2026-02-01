@@ -9,7 +9,7 @@ import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
-import Script from "next/script";
+import Script from "next/script"; // Keeps your site fast
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }) {
 
   useEffect(() => {
     pingBackend();
-    setShowControls(true); 
+    setShowControls(true);
 
     const root = document.documentElement;
     const isDark = localStorage.getItem("theme") === "dark";
@@ -31,11 +31,11 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+      {/* --- GOOGLE ANALYTICS --- */}
       <Script
         strategy="afterInteractive"
         src="https://www.googletagmanager.com/gtag/js?id=G-PC07YVN071"
       />
-
       <Script id="ga-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
@@ -44,17 +44,23 @@ export default function App({ Component, pageProps }) {
           gtag('config', 'G-PC07YVN071');
         `}
       </Script>
-      
+
+      {/* --- CPM / ADSTERRA ADS (Fixed) --- */}
+      {/* We use Next.js Script component here to prevent it from slowing down the page */}
+      <Script 
+        src="https://pl28622114.effectivegatecpm.com/02/6b/23/026b2358b3ab017ec68abf3e0a32f689.js"
+        strategy="afterInteractive"
+      />
+
       {/* --- ADSENSE INTEGRATION --- */}
       <Head>
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
-        <script 
-          async 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4872587981884740" 
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4872587981884740"
           crossOrigin="anonymous"
         ></script>
       </Head>
-      {/* --------------------------- */}
 
       <div className="aura" />
 
