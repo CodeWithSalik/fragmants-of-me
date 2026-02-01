@@ -45,14 +45,15 @@ export default function App({ Component, pageProps }) {
         `}
       </Script>
 
-      {/* --- ADSTERRA (ADDED BACK IN) --- */}
+      {/* --- ADSTERRA SOCIAL BAR (Updated Strategy) --- */}
       <Script 
         src="https://pl28622114.effectivegatecpm.com/02/6b/23/026b2358b3ab017ec68abf3e0a32f689.js"
+        strategy="lazyOnload" 
       />
 
       {/* --- ADSENSE & VERIFICATION --- */}
       <Head>
-        {/* ✅ VERIFICATION TAG (Active) */}
+        {/* ✅ VERIFICATION TAG */}
         <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" />
         
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
@@ -65,6 +66,7 @@ export default function App({ Component, pageProps }) {
 
       <div className="aura" />
 
+      {/* ... Rest of your application ... */}
       <Toaster
         position="top-center"
         toastOptions={{
