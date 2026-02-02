@@ -69,7 +69,7 @@ export default async function handler(req, res) {
               <strong>${authorName}</strong> has just published a new fragment to the collection.
             </p>
             <div style="margin-top: 30px;">
-              <a href="https://fragments-of-me.vercel.app/entry/${entryId}" 
+              <a href="https://fragmants-of-me.vercel.app/entry/${entryId}" 
                  style="background-color: #2b2118; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">
                 Read Fragment
               </a>
