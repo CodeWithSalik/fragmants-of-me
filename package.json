@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-email/components": "^1.0.6",
+    "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",
     "eslint": "9.29.0",
     "eslint-config-next": "15.3.4",
