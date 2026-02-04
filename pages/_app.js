@@ -10,6 +10,8 @@ import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
+
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -96,6 +98,7 @@ export default function App({ Component, pageProps }) {
           >
             <Component {...pageProps} setAmbientMood={setAmbientMood} />
           </motion.main>
+           <Analytics />
         </AnimatePresence>
       </Layout>
     </AuthProvider>
