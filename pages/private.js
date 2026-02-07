@@ -34,14 +34,14 @@ export default function Private() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-7xl">
-      <Head><title>Private | Fragments of Me</title></Head>
+      <Head><title>Private | Fragmants of Me</title></Head>
 
       <div className="text-center mb-16">
         <div className="w-12 h-1 bg-accent/30 mx-auto mb-6 rounded-full"></div>
         <h1 className="text-4xl md:text-5xl font-serif font-black text-ink mb-4">
           Private Journal
         </h1>
-        <p className="text-muted italic">Fragments visible only to you.</p>
+        <p className="text-muted italic">Fragmants visible only to you.</p>
       </div>
 
       {loading ? (

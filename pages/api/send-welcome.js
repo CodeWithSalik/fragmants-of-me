@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const htmlContent = renderToStaticMarkup(
       <EmailTemplate 
         name={name} 
-        content="Thank you for joining our circle. Your account is now active. We hope you find peace in these fragments." 
+        content="Thank you for joining our circle. Your account is now active. We hope you find peace in these Fragmants." 
       />
     );
 
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     await transporter.sendMail({
       ...mailOptions,
       to: email,
-      subject: `Welcome to Fragments, ${name}`,
+      subject: `Welcome to Fragmants, ${name}`,
       html: htmlContent,
     });
 

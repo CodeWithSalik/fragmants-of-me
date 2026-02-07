@@ -40,11 +40,11 @@ export default function SavedPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-7xl">
-      <Head><title>Saved | Fragments of Me</title></Head>
+      <Head><title>Saved | Fragmants of Me</title></Head>
 
       <div className="text-center mb-16">
         <div className="w-12 h-1 bg-accent/30 mx-auto mb-6 rounded-full"></div>
-        <h1 className="text-4xl md:text-5xl font-serif font-black text-ink mb-4">Saved Fragments</h1>
+        <h1 className="text-4xl md:text-5xl font-serif font-black text-ink mb-4">Saved Fragmants</h1>
         <p className="text-muted italic">Pieces you chose to keep.</p>
       </div>
 

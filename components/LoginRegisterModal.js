@@ -93,7 +93,7 @@ export default function LoginRegisterModal({ onClose }) {
           </h2>
           <p className="text-sm text-muted">
             {isRegister
-              ? "Begin your collection of fragments."
+              ? "Begin your collection of Fragmants."
               : "Continue where you left off."}
           </p>
         </div>

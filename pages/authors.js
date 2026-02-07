@@ -14,7 +14,7 @@ export async function getServerSideProps() {
     return {
       id: d.id,
       name: data.name || "Anonymous",
-      bio: data.bio || "Writer at Fragments of Me",
+      bio: data.bio || "Writer at Fragmants of Me",
       // FIX: Convert Timestamp to String so Next.js doesn't crash
       joinedAt: data.joinedAt?.toDate().toLocaleDateString() || null,
     };
@@ -26,7 +26,7 @@ export async function getServerSideProps() {
 export default function AuthorsPage({ authors }) {
   return (
     <div className="container mx-auto px-4 py-16 max-w-6xl">
-      <Head><title>Authors | Fragments of Me</title></Head>
+      <Head><title>Authors | Fragmants of Me</title></Head>
 
       <div className="text-center mb-16">
         <div className="w-12 h-1 bg-accent/30 mx-auto mb-6 rounded-full"></div>

@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  // FIX: Changed 'fragments' to 'fragmants'
+  // FIX: Changed 'Fragmants' to 'fragmants'
   siteUrl: 'https://fragmants-of-me.vercel.app', 
   generateRobotsTxt: true,
   exclude: ['/admin', '/admin/*', '/private', '/api/*', '/write', '/404'],

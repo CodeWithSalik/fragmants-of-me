@@ -2,17 +2,18 @@ import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
-import { FiUser, FiMenu, FiX, FiBell } from "react-icons/fi";
+import { FiUser, FiMenu, FiX } from "react-icons/fi"; // Removed FiBell
 import { useState, useEffect } from "react";
-import { doc, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore"; // Removed collection/query logic
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import NotificationDropdown from "./NotificationDropdown"; // <--- ONLY NEW IMPORT
 
 export default function Header() {
   const [user] = useAuthState(auth);
   const [role, setRole] = useState("user");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // Removed unreadCount state (handled inside NotificationDropdown now)
   const router = useRouter();
 
   const isAdminRoute = router.pathname.startsWith("/admin");
@@ -20,17 +21,12 @@ export default function Header() {
   useEffect(() => {
     if (!user) {
       setRole("user");
-      setUnreadCount(0);
       return;
     }
     getDoc(doc(db, "users", user.uid)).then(s =>
       s.exists() && setRole(s.data().role || "user")
     );
-    const unsub = onSnapshot(
-      query(collection(db, "users", user.uid, "notifications"), where("read", "==", false)),
-      (s) => setUnreadCount(s.size)
-    );
-    return () => unsub();
+    // Removed the onSnapshot listener for notifications here
   }, [user]);
 
   useEffect(() => {
@@ -62,29 +58,30 @@ export default function Header() {
   };
 
   return (
-    <header className="site-header">
+    <header className="site-header relative z-50">
       <div className="container mx-auto px-4 max-w-[90rem] h-16 md:h-24 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <Image src="/logo.png" alt="Fragments" width={36} height={36} priority />
+          <Image src="/logo.png" alt="Fragmants" width={36} height={36} priority />
           <span className="block text-lg md:text-xl font-serif font-black tracking-tight text-ink hover:text-accent transition-colors">
-            Fragments
+            Fragmants
           </span>
         </Link>
 
-        <nav className="hidden md:flex justify-center items-center gap-12">
+        <nav className="hidden md:flex justify-center items-center gap-12 px-7">
           {!isAdminRoute ? (
             <>
               <NavLink href="/">Home</NavLink>
               <NavLink href="/poems">Poems</NavLink>
               <NavLink href="/diary">Diary</NavLink>
               <NavLink href="/monologues">Monologues</NavLink>
+              <NavLink href="/perspectives">Perspectives</NavLink>
               <NavLink href="/authors">Authors</NavLink>
+              <NavLink href="/private">Private</NavLink>
               {/* INTEGRATED SAVED LINK */}
               {user && <NavLink href="/saved">Saved</NavLink>}
               {(role === "author" || role === "admin") && (
                 <>
                   <NavLink href="/write">Write</NavLink>
-                  <NavLink href="/private">Private</NavLink>
                 </>
               )}
               {role === "admin" && <NavLink href="/admin">Admin</NavLink>}
@@ -101,16 +98,11 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-6">
           {user ? (
             <>
-              <div className="relative">
-                <Link href="/notifications" className="text-ink hover:text-accent">
-                  <FiBell size={20} />
-                </Link>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold h-3 w-3 flex items-center justify-center rounded-full animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
+              {/* --- REPLACED MANUAL BELL WITH DROPDOWN --- */}
+              <div className="relative flex items-center">
+                 <NotificationDropdown />
               </div>
+              
               <Link href="/profile" className="text-ink hover:text-accent">
                 <FiUser size={20} />
               </Link>
@@ -119,13 +111,16 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="px-6 py-2 rounded-full bg-ink text-white dark:bg-accent dark:text-black text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+            <Link href="/login" className="px-6 py-2 rounded-full bg-accent text-black dark:bg-accent dark:text-black text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
               Login
             </Link>
           )}
         </div>
 
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center gap-4">
+          {/* Added Dropdown to Mobile View as well */}
+          {user && <NotificationDropdown />} 
+          
           <button onClick={toggleMenu} className="text-2xl text-ink hover:text-accent p-2 rounded-lg active:scale-95 transition">
             {menuOpen ? <FiX /> : <FiMenu />}
           </button>
@@ -144,7 +139,10 @@ export default function Header() {
                     <NavLink href="/poems" className="text-xl">Poems</NavLink>
                     <NavLink href="/diary" className="text-xl">Diary</NavLink>
                     <NavLink href="/monologues" className="text-xl">Monologues</NavLink>
+                    <NavLink href="/perspectives" className="text-xl">Perspectives</NavLink>
                     <NavLink href="/authors" className="text-xl">Authors</NavLink>
+                    <NavLink href="/private" className="text-xl">Private</NavLink>
+
                     {/* MOBILE SAVED LINK */}
                     {user && <NavLink href="/saved" className="text-xl">Saved</NavLink>}
                     {(role === "author" || role === "admin") && <NavLink href="/write" className="text-xl">Write</NavLink>}

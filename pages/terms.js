@@ -4,7 +4,7 @@ export default function Terms() {
   return (
     <div className="container mx-auto px-4 py-16 max-w-4xl font-serif">
       <Head>
-        <title>Terms & Conditions | Fragments of Me</title>
+        <title>Terms & Conditions | Fragmants of Me</title>
       </Head>
       
       <h1 className="text-3xl font-bold mb-8 text-ink">Terms & Conditions</h1>
@@ -14,7 +14,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-bold text-ink mb-2">1. Acceptance of Terms</h2>
             <p>
-              By accessing Fragments of Me, you agree to be bound by these terms. If you do not agree, please do not use the service.
+              By accessing Fragmants of Me, you agree to be bound by these terms. If you do not agree, please do not use the service.
             </p>
           </section>
           

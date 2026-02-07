@@ -4,7 +4,8 @@ import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "react-hot-toast";
 import { checkIfAdmin } from "@/lib/checkAdmin";
-import { FiTrash2, FiCornerDownRight, FiMapPin } from "react-icons/fi";
+import { FiTrash2, FiCornerDownRight, FiMapPin, FiMessageSquare } from "react-icons/fi";
+import Link from "next/link";
 
 export default function CommentSection({ entryId }) {
   const [comment, setComment] = useState("");
@@ -14,6 +15,10 @@ export default function CommentSection({ entryId }) {
   const [pinnedId, setPinnedId] = useState(null);
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Test Mode State
+  const [isTestMode, setIsTestMode] = useState(false);
+  const [entryTitle, setEntryTitle] = useState("");
 
   useEffect(() => {
     if (user?.uid) checkIfAdmin(user.uid).then(setIsAdmin);
@@ -21,7 +26,11 @@ export default function CommentSection({ entryId }) {
 
   useEffect(() => {
     getDoc(doc(db, "entries", entryId)).then((snap) => {
-      if (snap.exists()) setPinnedId(snap.data().pinnedCommentId || null);
+      if (snap.exists()) {
+        const data = snap.data();
+        setPinnedId(data.pinnedCommentId || null);
+        setEntryTitle(data.title || "Fragment");
+      }
     });
   }, [entryId]);
 
@@ -44,6 +53,9 @@ export default function CommentSection({ entryId }) {
     e.preventDefault();
     if (!comment.trim() || !user) return;
     
+    // 1. Get Token
+    const token = await user.getIdToken();
+
     await addDoc(collection(db, "entries", entryId, "comments"), {
       content: comment.trim(),
       authorId: user.uid,
@@ -51,30 +63,40 @@ export default function CommentSection({ entryId }) {
       timestamp: serverTimestamp(),
     });
 
-    // RESEND NOTIFICATION LOGIC
+    // 2. Call API with Token
     const entrySnap = await getDoc(doc(db, "entries", entryId));
     if (entrySnap.exists()) {
       const authorSnap = await getDoc(doc(db, "users", entrySnap.data().uid));
       if (authorSnap.exists()) {
         fetch("/api/comment-notification", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // <--- Sending Token
+          },
           body: JSON.stringify({
             targetEmail: authorSnap.data().email,
             targetName: authorSnap.data().name,
             commenterName: user.displayName,
             content: comment.trim(),
-            type: "comment"
+            type: "comment",
+            entryId: entryId,
+            entryTitle: entryTitle,
+            testMode: isTestMode
           }),
         });
       }
     }
     setComment("");
-    toast.success("Echo left.");
+    toast.success(isTestMode ? "Echo left (Test Mode)" : "Echo left.");
   };
 
   const handleReplySubmit = async (commentId, text) => {
     if (!text.trim() || !user) return;
+    
+    // 1. Get Token
+    const token = await user.getIdToken();
+
     await addDoc(collection(db, "entries", entryId, "comments", commentId, "replies"), {
       content: text.trim(),
       authorId: user.uid,
@@ -82,20 +104,26 @@ export default function CommentSection({ entryId }) {
       timestamp: serverTimestamp(),
     });
 
-    // RESEND REPLY NOTIFICATION
+    // 2. Call API with Token
     const parentCommentSnap = await getDoc(doc(db, "entries", entryId, "comments", commentId));
     if (parentCommentSnap.exists()) {
       const parentAuthorSnap = await getDoc(doc(db, "users", parentCommentSnap.data().authorId));
       if (parentAuthorSnap.exists()) {
         fetch("/api/comment-notification", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // <--- Sending Token
+          },
           body: JSON.stringify({
             targetEmail: parentAuthorSnap.data().email,
             targetName: parentAuthorSnap.data().name,
             commenterName: user.displayName,
             content: text.trim(),
-            type: "reply"
+            type: "reply",
+            entryId: entryId,
+            entryTitle: entryTitle,
+            testMode: isTestMode
           }),
         });
       }
@@ -146,20 +174,68 @@ export default function CommentSection({ entryId }) {
   };
 
   return (
-    <div className="mt-16 pt-10 border-t border-black/5 dark:border-white/5">
-      <h3 className="text-xl font-serif font-bold text-ink mb-6">Echoes</h3>
-      {user ? (
-        <form onSubmit={handleSubmit} className="mb-10 relative">
-          <textarea className="w-full h-24 p-4 pr-12 resize-none text-base font-serif bg-white/40 dark:bg-white/5 rounded-xl border border-black/10 dark:border-white/10 focus:ring-1 focus:ring-accent outline-none transition-all" placeholder="Leave a fragment of your thought..." value={comment} onChange={(e) => setComment(e.target.value)} />
-          <button type="submit" className="absolute bottom-3 right-3 p-2 bg-accent/10 text-accent rounded-full hover:bg-accent hover:text-white transition-all disabled:opacity-50" disabled={!comment.trim()}><FiCornerDownRight size={18} /></button>
-        </form>
-      ) : (
-        <p className="text-center text-muted italic mb-10">Login to leave an echo.</p>
-      )}
-      <div className="space-y-2">
+    <div id="comments-section" className="mt-16 pt-10 border-t border-black/10 dark:border-white/10">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-3 bg-accent/10 rounded-full text-accent">
+          <FiMessageSquare size={24} />
+        </div>
+        <div>
+          <h3 className="text-2xl font-serif font-bold text-ink">Reader Echoes</h3>
+          <p className="text-sm text-muted">Share your thoughts on this fragment</p>
+        </div>
+      </div>
+
+      <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-6 mb-10">
+        {user ? (
+          <form onSubmit={handleSubmit} className="relative">
+            <textarea 
+              className="w-full h-32 p-4 pr-12 resize-none text-base font-serif bg-white dark:bg-black/20 rounded-xl border-none focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-muted/50" 
+              placeholder="Leave a fragment of your thought..." 
+              value={comment} 
+              onChange={(e) => setComment(e.target.value)} 
+            />
+            <div className="flex justify-between items-center mt-3">
+               {/* ADMIN-ONLY TEST MODE CHECKBOX */}
+               {isAdmin ? (
+                 <label className="flex items-center gap-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity">
+                   <input 
+                     type="checkbox" 
+                     checked={isTestMode} 
+                     onChange={() => setIsTestMode(!isTestMode)} 
+                     className="w-3 h-3 accent-yellow-500"
+                   />
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Test Notify</span>
+                 </label>
+               ) : <div />}
+
+               <button 
+                type="submit" 
+                className="px-6 py-2 bg-accent text-white rounded-lg text-sm font-bold uppercase tracking-wide hover:bg-accent-strong transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                disabled={!comment.trim()}
+              >
+                Post Echo
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted italic mb-4">You must be logged in to leave an echo.</p>
+            <Link href="/login" className="inline-block px-8 py-3 rounded-full bg-ink text-paper font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform">
+              Login to Comment
+            </Link>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
         {pinnedId && comments.find(c => c.id === pinnedId) && renderComment(comments.find(c => c.id === pinnedId))}
         {comments.filter(c => c.id !== pinnedId).map(c => renderComment(c))}
-        {comments.length === 0 && <p className="text-center text-muted/40 italic">Silence...</p>}
+        
+        {comments.length === 0 && (
+          <div className="text-center py-12 border-2 border-dashed border-black/5 dark:border-white/5 rounded-xl">
+            <p className="text-muted/40 italic">No echoes yet. Be the first to speak.</p>
+          </div>
+        )}
       </div>
     </div>
   );

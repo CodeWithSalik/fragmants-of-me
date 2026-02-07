@@ -88,7 +88,7 @@ export default function NewsletterPage() {
                 <input 
                   value={subject} 
                   onChange={(e) => setSubject(e.target.value)} 
-                  placeholder="Weekly Fragments..." 
+                  placeholder="Weekly Fragmants..." 
                   className="w-full bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl p-3 focus:ring-1 focus:ring-accent outline-none"
                 />
               </div>
@@ -118,7 +118,7 @@ export default function NewsletterPage() {
                       {/* Exact Styling from API Template */}
                       <div style={{ fontFamily: 'Georgia, serif', color: '#2b2118', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
                         <h1 style={{ color: '#b45309', borderBottom: '1px solid #ddd', paddingBottom: '10px', fontSize: '24px', fontWeight: 'bold' }}>
-                          Fragments of Me
+                          Fragmants of Me
                         </h1>
                         <div 
                           style={{ margin: '20px 0', whiteSpace: 'pre-wrap' }} 

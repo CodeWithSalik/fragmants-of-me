@@ -10,7 +10,7 @@ import Head from "next/head";
 export default function Custom404() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <Head><title>Lost | Fragments of Me</title></Head>
+      <Head><title>Lost | Fragmants of Me</title></Head>
       
       <div className="aura-card reading-mode w-full max-w-lg">
         <div className="aura-card-content p-12 text-center">

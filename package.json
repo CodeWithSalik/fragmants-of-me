@@ -1,5 +1,5 @@
 {
-  "name": "fragments-of-me",
+  "name": "Fragmants-of-me",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@react-email/components": "^1.0.6",
     "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",

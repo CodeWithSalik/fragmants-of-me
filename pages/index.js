@@ -56,7 +56,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <Head><title>Fragments of Me</title></Head>
+      <Head><title>Fragmants of Me</title></Head>
 
       {/* --- 1. HERO SECTION (Editorial Style) --- */}
       <div className="relative pt-24 pb-20 text-center">
@@ -65,7 +65,7 @@ export default function Home() {
         <div className="w-16 h-1 bg-accent/20 mx-auto mb-8 rounded-full"></div>
 
         <h1 className="text-5xl md:text-8xl font-serif font-black text-ink mb-6 tracking-tight leading-[0.9]">
-          Fragments <br className="sm:hidden" /> <span className="italic text-accent font-light">of</span> Me
+          Fragmants <br className="sm:hidden" /> <span className="italic text-accent font-light">of</span> Me
         </h1>
 
         <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted leading-relaxed mb-10 font-serif antialiased opacity-90">
@@ -117,7 +117,7 @@ export default function Home() {
       <section>
         <div className="flex items-center justify-center mb-12">
           <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-accent/80 border-b-2 border-accent/20 pb-2">
-            Latest Fragments
+            Latest Fragmants
           </h2>
         </div>
 
@@ -130,7 +130,7 @@ export default function Home() {
         ) : filteredEntries.length === 0 ? (
           <div className="text-center py-20 opacity-50">
             <p className="font-serif italic text-2xl">Silence...</p>
-            <p className="text-sm mt-2">No fragments found matching your search.</p>
+            <p className="text-sm mt-2">No Fragmants found matching your search.</p>
           </div>
         ) : (
           /* CSS Columns for true Masonry layout */

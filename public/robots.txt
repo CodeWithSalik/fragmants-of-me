@@ -9,7 +9,7 @@ Disallow: /write
 Disallow: /404
 
 # Host
-Host: https://fragments-of-me.vercel.app
+Host: https://Fragmants-of-me.vercel.app
 
 # Sitemaps
-Sitemap: https://fragments-of-me.vercel.app/sitemap.xml
+Sitemap: https://Fragmants-of-me.vercel.app/sitemap.xml

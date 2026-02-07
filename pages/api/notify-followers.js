@@ -46,14 +46,14 @@ export default async function handler(req, res) {
             "${title}" has just been published.
           </p>
           <div style="margin-top: 30px;">
-            <a href="https://fragments-of-me.vercel.app/entry/${entryId}" 
+            <a href="https://Fragmants-of-me.vercel.app/entry/${entryId}" 
                style="background-color: #b45309; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
               Read Fragment
             </a>
           </div>
           <hr style="border: 0; border-top: 1px solid #eee; margin-top: 40px;" />
           <p style="font-size: 12px; color: #888;">
-            You are receiving this because you follow ${authorName} on Fragments of Me.
+            You are receiving this because you follow ${authorName} on Fragmants of Me.
           </p>
         </div>
       `,

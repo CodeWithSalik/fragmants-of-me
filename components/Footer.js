@@ -8,7 +8,7 @@ export default function Footer() {
 
         {/* Brand */}
         <div className="text-center md:text-left">
-          <h3 className="text-lg font-serif font-bold text-ink mb-1">Fragments of Me</h3>
+          <h3 className="text-lg font-serif font-bold text-ink mb-1">Fragmants of Me</h3>
           <p className="text-xs text-muted uppercase tracking-widest">CodeWithSalik © {new Date().getFullYear()}</p>
         </div>
         <div className="flex flex-wrap justify-center gap-6 text-xs font-bold text-muted/80 uppercase tracking-widest">

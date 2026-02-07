@@ -34,7 +34,7 @@ export default function Contact() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-2xl">
-      <Head><title>Contact | Fragments of Me</title></Head>
+      <Head><title>Contact | Fragmants of Me</title></Head>
       
       <div className="text-center mb-12">
         <h1 className="text-4xl font-serif font-bold text-ink">Reach Out</h1>

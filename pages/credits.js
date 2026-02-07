@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Credits() {
   return (
     <div className="container mx-auto px-4 py-20 max-w-3xl">
-      <Head><title>Credits | Fragments of Me</title></Head>
+      <Head><title>Credits | Fragmants of Me</title></Head>
 
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-serif font-black text-ink mb-4">Credits</h1>
@@ -41,7 +41,7 @@ export default function Credits() {
               </div>
 
               <div className="p-4 bg-black/5 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5">
-                <p className="text-ink font-bold text-lg mb-1">Fragments</p>
+                <p className="text-ink font-bold text-lg mb-1">Fragmants</p>
                 <p className="mb-1">Composer: <a href="https://www.youtube.com/channel/UCoZbM1a4PKQ6haa2Ap4TSdg" target="_blank" rel="noreferrer" className="underline hover:text-accent">AERØHEAD</a></p>
                 <p className="text-xs opacity-80">License: Creative Commons (BY-NC 3.0)</p>
               </div>

@@ -98,8 +98,8 @@ export default function App({ Component, pageProps }) {
           >
             <Component {...pageProps} setAmbientMood={setAmbientMood} />
           </motion.main>
-           <Analytics />
         </AnimatePresence>
+           <Analytics />
       </Layout>
     </AuthProvider>
   );

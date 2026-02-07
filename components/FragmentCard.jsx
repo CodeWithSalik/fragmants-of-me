@@ -12,6 +12,7 @@ export default function FragmentCard({ entry, index = 0 }) {
     poem: "bg-emerald-900/10 text-emerald-800 dark:text-emerald-400 dark:bg-emerald-400/10 border-emerald-900/10",
     diary: "bg-amber-900/10 text-amber-900 dark:text-amber-400 dark:bg-amber-400/10 border-amber-900/10",
     monologue: "bg-rose-900/10 text-rose-900 dark:text-rose-400 dark:bg-rose-400/10 border-rose-900/10",
+    perspective: "bg-slate-900/10 text-slate-900 dark:text-slate-400 dark:bg-slate-400/10 border-slate-900/10",
   };
 
 
@@ -42,7 +43,7 @@ export default function FragmentCard({ entry, index = 0 }) {
                 </div>
                 
                 <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-bold border ${badgeColors[entry.type] || "bg-gray-100 text-gray-500"}`}>
-                  {entry.type}
+                  {entry.type === 'perspective' ? 'Perspectives' : entry.type}
                 </span>
               </div>
 

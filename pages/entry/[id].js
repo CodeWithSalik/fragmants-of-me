@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
-  getDoc, doc, deleteDoc, updateDoc, collection, getDocs, setDoc, getCountFromServer, serverTimestamp
+  getDoc, doc, deleteDoc, updateDoc, collection, setDoc, getCountFromServer, serverTimestamp, increment
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -11,7 +11,7 @@ import { checkIfAdmin } from "@/lib/checkAdmin";
 import MotionWrap from "@/components/MotionWrap";
 import ReactionLine from "@/components/ReactionLine";
 import Head from "next/head";
-import { FiHeart, FiBookmark, FiEye, FiEdit2, FiTrash2, FiGlobe, FiLock } from "react-icons/fi";
+import { FiHeart, FiBookmark, FiEye, FiEdit2, FiTrash2, FiGlobe, FiLock, FiMessageSquare } from "react-icons/fi";
 
 export default function EntryPage({ setAmbientMood }) {
   const router = useRouter();
@@ -40,29 +40,34 @@ export default function EntryPage({ setAmbientMood }) {
       if (snap.exists()) {
         const data = snap.data();
         setEntry({ id: snap.id, ...data });
-        // Trigger ambient sound change based on entry mood
         if (setAmbientMood) setAmbientMood(data.mood || "warm");
       }
     };
     loadEntry();
   }, [id, setAmbientMood]);
 
-  // 3. Fetch Stats (Likes, Views, Saved Status)
+  // 3. Fetch Stats (OPTIMIZED)
   useEffect(() => {
     if (!entry) return;
     const loadStats = async () => {
-      // Likes
+      // A. Optimized Likes Count (Server Count)
       const likesRef = collection(db, "entries", entry.id, "likes");
-      const likesSnap = await getDocs(likesRef);
-      setLikesCount(likesSnap.size);
-      if (user) setHasLiked(likesSnap.docs.some(d => d.id === user.uid));
+      const likesCountSnap = await getCountFromServer(likesRef);
+      setLikesCount(likesCountSnap.data().count);
 
-      // Views
+      // B. Check if Current User Liked (Direct Doc Fetch)
+      if (user) {
+        const userLikeRef = doc(db, "entries", entry.id, "likes", user.uid);
+        const userLikeSnap = await getDoc(userLikeRef);
+        setHasLiked(userLikeSnap.exists());
+      }
+
+      // C. Views
       const viewsRef = collection(db, "entries", entry.id, "views");
       const viewsSnap = await getCountFromServer(viewsRef);
       setViewsCount(viewsSnap.data().count);
 
-      // Saved Check
+      // D. Saved Check
       if (user) {
         const savedRef = doc(db, "users", user.uid, "saved", entry.id);
         const savedSnap = await getDoc(savedRef);
@@ -75,23 +80,39 @@ export default function EntryPage({ setAmbientMood }) {
   // 4. Record View
   useEffect(() => {
     if (!entry || !user) return;
-    const viewRef = doc(db, "entries", entry.id, "views", user.uid);
-    setDoc(viewRef, { timestamp: serverTimestamp() }, { merge: true });
+    const recordView = async () => {
+      const viewRef = doc(db, "entries", entry.id, "views", user.uid);
+      const entryRef = doc(db, "entries", entry.id);
+
+      const viewSnap = await getDoc(viewRef);
+      if (!viewSnap.exists()) {
+        await setDoc(viewRef, { timestamp: serverTimestamp() });
+        // Increment parent view counter for dashboard sync
+        await updateDoc(entryRef, { views: increment(1) });
+        setViewsCount(prev => prev + 1);
+      }
+    };
+    recordView();
   }, [entry, user]);
 
   // --- ACTIONS ---
 
   const toggleLike = async () => {
     if (!user) return toast.error("Please login to like");
+    
     const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
+    const entryRef = doc(db, "entries", entry.id);
+
+    // Optimistic UI Update
+    setHasLiked(!hasLiked);
+    setLikesCount(prev => hasLiked ? prev - 1 : prev + 1);
+
     if (hasLiked) {
       await deleteDoc(likeRef);
-      setHasLiked(false);
-      setLikesCount(p => p - 1);
+      await updateDoc(entryRef, { likes: increment(-1) });
     } else {
       await setDoc(likeRef, { createdAt: new Date(), uid: user.uid, name: user.displayName });
-      setHasLiked(true);
-      setLikesCount(p => p + 1);
+      await updateDoc(entryRef, { likes: increment(1) });
     }
   };
 
@@ -126,28 +147,19 @@ export default function EntryPage({ setAmbientMood }) {
   if (!entry) return <div className="min-h-screen flex items-center justify-center text-muted">Loading fragment...</div>;
 
   const isAuthor = user && entry.uid === user.uid;
-  
-  // --- SEO PREPARATION ---
   const description = entry.content.slice(0, 150).replace(/\n/g, " ") + (entry.content.length > 150 ? "..." : "");
-  // Note: Update this URL when you have your real domain
   const shareUrl = `https://fragments-of-me.vercel.app/entry/${entry.id}`; 
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      
-      {/* --- DYNAMIC SEO HEAD --- */}
       <Head>
         <title>{entry.title} | Fragments of Me</title>
         <meta name="description" content={description} />
-        
-        {/* Open Graph / Facebook / WhatsApp */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={entry.title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={shareUrl} />
         <meta property="og:site_name" content="Fragments of Me" />
-        
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content={entry.title} />
         <meta name="twitter:description" content={description} />
@@ -157,7 +169,6 @@ export default function EntryPage({ setAmbientMood }) {
         <div className="aura-card-content p-8 md:p-12">
           
           <MotionWrap>
-            {/* Header Metadata */}
             <div className="flex justify-between items-start mb-8 border-b border-black/5 dark:border-white/5 pb-6">
               <div>
                 <h1 className="hero-title text-3xl md:text-4xl text-ink mb-3 leading-tight">
@@ -172,7 +183,7 @@ export default function EntryPage({ setAmbientMood }) {
               
               <div className="flex flex-col items-end gap-2">
                 <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-ink/5 text-ink/70">
-                  {entry.type}
+                  {entry.type === 'perspective' ? 'Perspectives' : entry.type}
                 </span>
                 {entry.mood && (
                   <span className="text-xs text-muted/60 italic capitalize">
@@ -182,14 +193,12 @@ export default function EntryPage({ setAmbientMood }) {
               </div>
             </div>
 
-            {/* CONTENT (Interactive Lines) */}
             <div className="prose prose-lg prose-p:text-ink/90 prose-p:font-serif prose-p:leading-loose max-w-none mb-12">
               {entry.content.split("\n").map((line, i) => (
                 <ReactionLine key={i} entryId={entry.id} lineIndex={i} text={line} />
               ))}
             </div>
 
-            {/* Footer Actions */}
             <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-black/5 dark:border-white/5">
               <div className="flex items-center gap-6">
                 
@@ -199,6 +208,14 @@ export default function EntryPage({ setAmbientMood }) {
                 >
                   <FiHeart className={hasLiked ? "fill-current" : ""} size={20} />
                   <span className="text-sm font-semibold">{likesCount}</span>
+                </button>
+
+                <button 
+                  onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 transition-colors text-muted hover:text-ink"
+                >
+                  <FiMessageSquare size={20} />
+                  <span className="text-sm font-semibold">Discuss</span>
                 </button>
 
                 <button 
@@ -225,7 +242,6 @@ export default function EntryPage({ setAmbientMood }) {
         </div>
       </div>
 
-      {/* Admin & Author Controls */}
       {(isAdmin || isAuthor) && (
         <div className="mt-6 flex justify-end gap-3 opacity-70 hover:opacity-100 transition-opacity">
           <button onClick={() => router.push(`/edit/${entry.id}`)} className="text-sm text-blue-500 hover:underline flex items-center gap-2">
@@ -240,7 +256,6 @@ export default function EntryPage({ setAmbientMood }) {
         </div>
       )}
 
-      {/* Comments Section */}
       <div className="mt-12">
         <CommentSection entryId={entry.id} />
       </div>

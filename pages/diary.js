@@ -27,7 +27,7 @@ export default function Diary() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-7xl">
-      <Head><title>Diary | Fragments of Me</title></Head>
+      <Head><title>Diary | Fragmants of Me</title></Head>
 
       <div className="text-center mb-16">
         <div className="w-12 h-1 bg-accent/30 mx-auto mb-6 rounded-full"></div>
