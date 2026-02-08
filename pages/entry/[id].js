@@ -50,24 +50,20 @@ export default function EntryPage({ setAmbientMood }) {
   useEffect(() => {
     if (!entry) return;
     const loadStats = async () => {
-      // A. Optimized Likes Count (Server Count)
       const likesRef = collection(db, "entries", entry.id, "likes");
       const likesCountSnap = await getCountFromServer(likesRef);
       setLikesCount(likesCountSnap.data().count);
 
-      // B. Check if Current User Liked (Direct Doc Fetch)
       if (user) {
         const userLikeRef = doc(db, "entries", entry.id, "likes", user.uid);
         const userLikeSnap = await getDoc(userLikeRef);
         setHasLiked(userLikeSnap.exists());
       }
 
-      // C. Views
       const viewsRef = collection(db, "entries", entry.id, "views");
       const viewsSnap = await getCountFromServer(viewsRef);
       setViewsCount(viewsSnap.data().count);
 
-      // D. Saved Check
       if (user) {
         const savedRef = doc(db, "users", user.uid, "saved", entry.id);
         const savedSnap = await getDoc(savedRef);
@@ -87,7 +83,6 @@ export default function EntryPage({ setAmbientMood }) {
       const viewSnap = await getDoc(viewRef);
       if (!viewSnap.exists()) {
         await setDoc(viewRef, { timestamp: serverTimestamp() });
-        // Increment parent view counter for dashboard sync
         await updateDoc(entryRef, { views: increment(1) });
         setViewsCount(prev => prev + 1);
       }
@@ -103,7 +98,6 @@ export default function EntryPage({ setAmbientMood }) {
     const likeRef = doc(db, "entries", entry.id, "likes", user.uid);
     const entryRef = doc(db, "entries", entry.id);
 
-    // Optimistic UI Update
     setHasLiked(!hasLiked);
     setLikesCount(prev => hasLiked ? prev - 1 : prev + 1);
 
@@ -199,8 +193,9 @@ export default function EntryPage({ setAmbientMood }) {
               ))}
             </div>
 
+            {/* --- FIX: Added flex-wrap and adjusted gap for mobile responsiveness --- */}
             <div className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t border-black/5 dark:border-white/5">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-4 md:gap-6">
                 
                 <button 
                   onClick={toggleLike} 
