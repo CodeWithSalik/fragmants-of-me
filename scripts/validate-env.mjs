@@ -30,3 +30,10 @@ if (missing.length) {
 }
 
 console.log("✅ Environment validation passed.");
+
+
+const publicUrlCandidates = [process.env.NEXT_PUBLIC_BASE_URL, process.env.FRONTEND_URL].filter(Boolean);
+if ((process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production") && publicUrlCandidates.some((u) => u.includes("localhost"))) {
+  console.error("❌ Production URLs cannot point to localhost (NEXT_PUBLIC_BASE_URL/FRONTEND_URL).");
+  process.exit(1);
+}

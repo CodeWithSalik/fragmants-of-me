@@ -52,3 +52,6 @@ Set all variables from `.env.example` in your deployment provider:
 ## Common Vercel failure
 
 If you see `Application error: a client-side exception has occurred`, verify all `NEXT_PUBLIC_FIREBASE_*` variables are present in **Production** and **Preview** environments and redeploy.
+
+- Ensure `FIREBASE_PRIVATE_KEY` keeps its full key body. Both escaped newlines (`\n`) and pasted single-line keys are supported, but missing header/footer will fail admin init.
+- In Production, do not use `http://localhost:3000` for `NEXT_PUBLIC_BASE_URL` or `FRONTEND_URL`.
