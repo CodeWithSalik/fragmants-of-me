@@ -1,9 +1,9 @@
-import Head from "next/head";
+import SeoHead from "@/components/SeoHead";
 
 export default function About() {
   return (
     <div className="container mx-auto px-4 py-16 max-w-4xl">
-      <Head><title>About | Fragmants of Me</title></Head>
+      <SeoHead title="About" path="/about" description="Learn the story and editorial philosophy behind Fragmants of Me." />
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-6xl font-serif font-black text-ink mb-4">The Story</h1>
         <p className="text-muted italic">Why Fragmants of Me exists.</p>

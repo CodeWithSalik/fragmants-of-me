@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs, doc, getDoc } from "firebase/firestore";
-import Link from "next/link";
-import Head from "next/head";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import FragmentCard from "@/components/FragmentCard";
 import { useAuth } from "@/lib/auth";
 import { FiSearch } from "react-icons/fi";
+import { fetchFollowingEntriesPage, fetchPublicEntriesPage } from "@/lib/data/entries";
+import DailyRitualCard from "@/components/DailyRitualCard";
+import SeoHead from "@/components/SeoHead";
 
 export default function Home() {
   const [entries, setEntries] = useState([]);
@@ -14,21 +15,20 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [followFeed, setFollowFeed] = useState([]);
 
-  // Fetch Logic (Kept mostly same, just cleaned up)
   useEffect(() => {
     const fetchQuote = async () => {
       const ref = doc(db, "settings", "quoteOfTheDay");
       const snap = await getDoc(ref);
       if (snap.exists()) setQuote(snap.data().text);
     };
-    fetchQuote();
 
     const fetchEntries = async () => {
-      const q = query(collection(db, "entries"), where("isPrivate", "==", false), orderBy("timestamp", "desc"));
-      const snapshot = await getDocs(q);
-      setEntries(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      const { entries: pageEntries } = await fetchPublicEntriesPage();
+      setEntries(pageEntries);
       setLoading(false);
     };
+
+    fetchQuote();
     fetchEntries();
   }, []);
 
@@ -38,30 +38,27 @@ export default function Home() {
     if (!currentUser) return;
     const loadFollowFeed = async () => {
       const snap = await getDocs(collection(db, "users", currentUser.uid, "following"));
-      const authorIds = snap.docs.map(d => d.id);
-      if (authorIds.length === 0) return;
-      const q = query(collection(db, "entries"), where("uid", "in", authorIds), where("isPrivate", "==", false), orderBy("timestamp", "desc"));
-      const postsSnap = await getDocs(q);
-      setFollowFeed(postsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const authorIds = snap.docs.map((d) => d.id);
+      const { entries: followedEntries } = await fetchFollowingEntriesPage({ authorIds });
+      setFollowFeed(followedEntries);
     };
     loadFollowFeed();
   }, [currentUser]);
 
-  // Search Filter
-  const filteredEntries = entries.filter((e) =>
-    e.title.toLowerCase().includes(search.toLowerCase()) ||
-    e.content.toLowerCase().includes(search.toLowerCase()) ||
-    e.authorName?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredEntries = useMemo(() => {
+    const normalizedSearch = search.toLowerCase();
+    return entries.filter((e) =>
+      e.title.toLowerCase().includes(normalizedSearch) ||
+      e.content.toLowerCase().includes(normalizedSearch) ||
+      e.authorName?.toLowerCase().includes(normalizedSearch)
+    );
+  }, [entries, search]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <Head><title>Fragmants of Me</title></Head>
+      <SeoHead title="Home" path="/" />
 
-      {/* --- 1. HERO SECTION (Editorial Style) --- */}
       <div className="relative pt-24 pb-20 text-center">
-        
-        {/* Subtle decorative flourish */}
         <div className="w-16 h-1 bg-accent/20 mx-auto mb-8 rounded-full"></div>
 
         <h1 className="text-5xl md:text-8xl font-serif font-black text-ink mb-6 tracking-tight leading-[0.9]">
@@ -69,7 +66,7 @@ export default function Home() {
         </h1>
 
         <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted leading-relaxed mb-10 font-serif antialiased opacity-90">
-          A collection of poems, monologues, and quiet confessions.<br className="hidden md:block"/> 
+          A collection of poems, monologues, and quiet confessions.<br className="hidden md:block"/>
           Written to be <span className="italic text-ink font-semibold">felt</span> more than understood.
         </p>
 
@@ -81,7 +78,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* --- 2. FLOATING SEARCH BAR --- */}
+      <DailyRitualCard user={currentUser} />
+
       <div className="sticky top-24 z-30 max-w-lg mx-auto mb-20">
         <div className="relative group">
           <div className="absolute inset-0 bg-accent/20 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 rounded-full"></div>
@@ -98,7 +96,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- 3. FOLLOW FEED --- */}
       {followFeed.length > 0 && (
         <section className="mb-24">
           <div className="flex items-center gap-4 mb-10">
@@ -113,7 +110,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* --- 4. MAIN MASONRY FEED --- */}
       <section>
         <div className="flex items-center justify-center mb-12">
           <h2 className="text-xs font-bold tracking-[0.3em] uppercase text-accent/80 border-b-2 border-accent/20 pb-2">
@@ -133,11 +129,9 @@ export default function Home() {
             <p className="text-sm mt-2">No Fragmants found matching your search.</p>
           </div>
         ) : (
-          /* CSS Columns for true Masonry layout */
           <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
             {filteredEntries.map((entry, idx) => (
               <div key={entry.id} className="break-inside-avoid mb-8">
-                {/* Pass Index for staggered animation */}
                 <FragmentCard entry={entry} index={idx} />
               </div>
             ))}

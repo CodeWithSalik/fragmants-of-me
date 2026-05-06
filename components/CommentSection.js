@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -19,6 +19,7 @@ export default function CommentSection({ entryId }) {
   // Test Mode State
   const [isTestMode, setIsTestMode] = useState(false);
   const [entryTitle, setEntryTitle] = useState("");
+  const repliesUnsubsRef = useRef(new Map());
 
   useEffect(() => {
     if (user?.uid) checkIfAdmin(user.uid).then(setIsAdmin);
@@ -35,18 +36,47 @@ export default function CommentSection({ entryId }) {
   }, [entryId]);
 
   useEffect(() => {
+    return () => {
+      repliesUnsubsRef.current.forEach((unsub) => unsub());
+      repliesUnsubsRef.current.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     const q = query(collection(db, "entries", entryId, "comments"), orderBy("timestamp", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const loaded = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setComments(loaded);
+
+      // Remove stale reply listeners to prevent memory leaks and duplicate reads
+      const activeIds = new Set(loaded.map((c) => c.id));
+      repliesUnsubsRef.current.forEach((unsub, commentId) => {
+        if (!activeIds.has(commentId)) {
+          unsub();
+          repliesUnsubsRef.current.delete(commentId);
+          setReplies((prev) => {
+            const next = { ...prev };
+            delete next[commentId];
+            return next;
+          });
+        }
+      });
+
       loaded.forEach((c) => {
+        if (repliesUnsubsRef.current.has(c.id)) return;
         const rRef = collection(db, "entries", entryId, "comments", c.id, "replies");
-        onSnapshot(query(rRef, orderBy("timestamp", "asc")), (rSnap) => {
+        const unsubReplies = onSnapshot(query(rRef, orderBy("timestamp", "asc")), (rSnap) => {
           setReplies((prev) => ({ ...prev, [c.id]: rSnap.docs.map(d => ({ id: d.id, ...d.data() })) }));
         });
+        repliesUnsubsRef.current.set(c.id, unsubReplies);
       });
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      repliesUnsubsRef.current.forEach((unsub) => unsub());
+      repliesUnsubsRef.current.clear();
+    };
   }, [entryId]);
 
   const handleSubmit = async (e) => {
