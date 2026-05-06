@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build && next-sitemap",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "predeploy": "node scripts/validate-env.mjs && npm run lint && npm run build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

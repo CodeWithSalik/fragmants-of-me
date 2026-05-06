@@ -1,38 +1,49 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Fragmants of Me
 
-## Getting Started
+Emotion-first literary/journaling platform built with Next.js + Firebase.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- `npm run dev` – start dev server
+- `npm run lint` – run ESLint (flat config)
+- `npm run build` – production build + sitemap generation
+- `npm run predeploy` – env validation + lint + build (required before release)
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Required environment variables
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Set all variables from `.env.example` in your deployment provider:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- Firebase client keys (`NEXT_PUBLIC_FIREBASE_*`)
+- Firebase admin credentials (`FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`)
+- SMTP keys (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM`)
 
-## Learn More
+## Deployment checklist
 
-To learn more about Next.js, take a look at the following resources:
+1. `npm ci`
+2. `npm run predeploy`
+3. Confirm sitemap generated and robots.txt present
+4. Smoke-test:
+   - Home, entry pages, type pages
+   - Login / write flow
+   - Comment + notifications flow
+5. Deploy to production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Rollback
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Re-deploy last known-good commit/tag from your provider dashboard.
+2. Restore prior environment variables if changed.
+3. Re-run `npm run predeploy` on rollback commit to verify stability.
+4. Verify core flows and notifications.
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Firebase client SDK initializes only when required `NEXT_PUBLIC` vars exist.
+- Canonical domain is standardized to `https://fragmants-of-me.vercel.app`.

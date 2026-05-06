@@ -119,7 +119,7 @@ export default async function handler(req, res) {
             </div>
 
             <div style="text-align: center; margin-top: 40px;">
-              <a href="https://Fragmants-of-me.vercel.app/entry/${entryId}" 
+              <a href="https://fragmants-of-me.vercel.app/entry/${entryId}" 
                  style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
                 Read Full Fragment
               </a>
