@@ -70,7 +70,7 @@ export default async function handler(req, res) {
           </div>
 
           <div style="text-align: center; margin-top: 40px;">
-            <a href="https://Fragmants-of-me.vercel.app/entry/${entryId}#comments-section" 
+            <a href="https://fragmants-of-me.vercel.app/entry/${entryId}#comments-section" 
                style="display: inline-block; background-color: #1a1a1a; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
               ${isReply ? "Reply Back" : "View Discussion"}
             </a>

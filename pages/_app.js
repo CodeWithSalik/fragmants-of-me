@@ -9,6 +9,7 @@ import { AuthProvider } from "@/lib/auth";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -30,6 +31,7 @@ export default function App({ Component, pageProps }) {
       root.classList.remove("dark");
     }
   }, []);
+
 
   return (
     <AuthProvider>
@@ -57,6 +59,27 @@ export default function App({ Component, pageProps }) {
       <Head>
         <meta name="google-site-verification" content="Yf3dKrXllPL5Q6FOqASeZF8fbW3wSlIhS_cDX6h1RhA" />
         <meta name="google-adsense-account" content="ca-pub-4872587981884740" />
+        <meta name="application-name" content={SITE_NAME} />
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} RSS`} href={`${SITE_URL}/rss.xml`} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: SITE_NAME,
+              url: SITE_URL,
+              description: SITE_DESCRIPTION,
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: `${SITE_URL}/?q={search_term_string}`,
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4872587981884740"

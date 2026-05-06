@@ -10,7 +10,8 @@ import toast from "react-hot-toast";
 import { checkIfAdmin } from "@/lib/checkAdmin";
 import MotionWrap from "@/components/MotionWrap";
 import ReactionLine from "@/components/ReactionLine";
-import Head from "next/head";
+import SeoHead from "@/components/SeoHead";
+import { SITE_NAME, absoluteUrl } from "@/lib/seo";
 import { FiHeart, FiBookmark, FiEye, FiEdit2, FiTrash2, FiGlobe, FiLock, FiMessageSquare } from "react-icons/fi";
 
 export default function EntryPage({ setAmbientMood }) {
@@ -142,22 +143,40 @@ export default function EntryPage({ setAmbientMood }) {
 
   const isAuthor = user && entry.uid === user.uid;
   const description = entry.content.slice(0, 150).replace(/\n/g, " ") + (entry.content.length > 150 ? "..." : "");
-  const shareUrl = `https://fragments-of-me.vercel.app/entry/${entry.id}`; 
+  const shareUrl = absoluteUrl(`/entry/${entry.id}`);
+  const publishedAt = entry.timestamp?.toDate?.()?.toISOString?.() || null;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      <Head>
-        <title>{entry.title} | Fragments of Me</title>
-        <meta name="description" content={description} />
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={entry.title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content={shareUrl} />
-        <meta property="og:site_name" content="Fragments of Me" />
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={entry.title} />
-        <meta name="twitter:description" content={description} />
-      </Head>
+      <SeoHead
+        title={entry.title}
+        description={description}
+        path={`/entry/${entry.id}`}
+        type="article"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: entry.title,
+            description,
+            author: {
+              '@type': 'Person',
+              name: entry.authorName || 'Unknown',
+            },
+            datePublished: publishedAt,
+            dateModified: publishedAt,
+            mainEntityOfPage: shareUrl,
+            publisher: {
+              '@type': 'Organization',
+              name: SITE_NAME,
+              url: absoluteUrl('/'),
+            },
+          }),
+        }}
+      />
 
       <div className="aura-card reading-mode">
         <div className="aura-card-content p-8 md:p-12">
