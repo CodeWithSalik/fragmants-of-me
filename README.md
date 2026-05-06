@@ -23,7 +23,7 @@ Set all variables from `.env.example` in your deployment provider:
 
 - Firebase client keys (`NEXT_PUBLIC_FIREBASE_*`)
 - Firebase admin credentials (`FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`)
-- SMTP keys (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM`)
+- SMTP keys (`MAIL_USER`/`EMAIL_USER`, `MAIL_PASS`/`EMAIL_PASS`, `MAIL_FROM`/`FROM_EMAIL`)
 
 ## Deployment checklist
 
@@ -47,3 +47,8 @@ Set all variables from `.env.example` in your deployment provider:
 
 - Firebase client SDK initializes only when required `NEXT_PUBLIC` vars exist.
 - Canonical domain is standardized to `https://fragmants-of-me.vercel.app`.
+
+
+## Common Vercel failure
+
+If you see `Application error: a client-side exception has occurred`, verify all `NEXT_PUBLIC_FIREBASE_*` variables are present in **Production** and **Preview** environments and redeploy.

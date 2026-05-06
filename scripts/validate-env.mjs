@@ -7,14 +7,20 @@ const required = [
   "NEXT_PUBLIC_FIREBASE_APP_ID",
   "FIREBASE_CLIENT_EMAIL",
   "FIREBASE_PRIVATE_KEY",
-  "MAIL_HOST",
-  "MAIL_PORT",
-  "MAIL_USER",
-  "MAIL_PASS",
-  "MAIL_FROM",
+];
+
+const smtpCandidates = [
+  ["MAIL_USER", "EMAIL_USER"],
+  ["MAIL_PASS", "EMAIL_PASS"],
+  ["MAIL_FROM", "FROM_EMAIL"],
 ];
 
 const missing = required.filter((k) => !process.env[k]);
+
+smtpCandidates.forEach((pair) => {
+  const hasOne = pair.some((k) => Boolean(process.env[k]));
+  if (!hasOne) missing.push(`${pair.join(" or ")}`);
+});
 
 if (missing.length) {
   console.error("❌ Missing required environment variables for deployment:\n");

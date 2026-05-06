@@ -10,6 +10,7 @@ import DarkModeToggle from "@/components/DarkModeToggle";
 import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { isFirebaseConfigured } from "@/lib/firebase";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -31,6 +32,23 @@ export default function App({ Component, pageProps }) {
       root.classList.remove("dark");
     }
   }, []);
+
+
+  if (!isFirebaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+        <div className="max-w-xl">
+          <h1 className="text-2xl font-bold mb-3">Configuration Error</h1>
+          <p className="text-muted">
+            Firebase client environment variables are missing. Set NEXT_PUBLIC_FIREBASE_API_KEY,
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+            and NEXT_PUBLIC_FIREBASE_APP_ID in Vercel project settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthProvider>
