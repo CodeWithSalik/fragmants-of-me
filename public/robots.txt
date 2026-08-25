@@ -1,3 +1,4 @@
+# *
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -6,6 +7,15 @@ Disallow: /api
 Disallow: /_next
 Disallow: /write
 Disallow: /404
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /profile
+Disallow: /notifications
+Disallow: /saved
 
+# Host
 Host: https://fragmants-of-me.vercel.app
+
+# Sitemaps
 Sitemap: https://fragmants-of-me.vercel.app/sitemap.xml

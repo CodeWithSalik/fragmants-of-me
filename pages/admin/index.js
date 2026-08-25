@@ -143,11 +143,11 @@ export default function AdminDashboard() {
 
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-white/40 dark:bg-black/40 rounded-xl">
-                <span className="text-sm font-bold text-muted">Public Fragments</span>
+                <span className="text-sm font-bold text-muted">Public fragmants</span>
                 <span className="text-lg font-bold text-ink">{stats?.public}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-white/40 dark:bg-black/40 rounded-xl">
-                <span className="text-sm font-bold text-muted">Private Fragments</span>
+                <span className="text-sm font-bold text-muted">Private fragmants</span>
                 <span className="text-lg font-bold text-ink flex items-center gap-2">
                   <FiLock size={14} /> {stats?.private}
                 </span>
