@@ -237,5 +237,59 @@ body::before {
   position: relative;
   z-index: 1;
 }
+/* =========================
+   PERFORMANCE-FRIENDLY ENTRY ANIMATION
+   Replaces Framer Motion for cards.
+========================= */
 
+.fragment-card-enter {
+  animation: fragmentCardIn 0.45s ease-out both;
+}
 
+@keyframes fragmentCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageEnter 0.2s ease-out both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fragment-card-enter,
+  .page-enter {
+    animation: none;
+  }
+}
+.motion-wrap {
+  animation: motionWrapIn 0.45s ease-out both;
+}
+
+@keyframes motionWrapIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

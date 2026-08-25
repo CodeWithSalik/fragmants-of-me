@@ -18,7 +18,6 @@
     "eslint-config-next": "15.3.4",
     "firebase": "^11.9.1",
     "firebase-admin": "^13.6.0",
-    "framer-motion": "^12.18.1",
     "next": "^16.1.6",
     "next-sitemap": "^4.2.3",
     "nodemailer": "^7.0.13",

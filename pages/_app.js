@@ -1,21 +1,30 @@
 import "@/styles/globals.css";
-import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import Layout from "@/components/Layout";
 import { AuthProvider } from "@/lib/auth";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import AmbientPlayer from "@/components/AmbientPlayer";
 import Head from "next/head";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 
+/*
+ * These controls are not needed for the initial HTML/page render.
+ * Loading them separately keeps them out of the critical bundle.
+ */
+const DarkModeToggle = dynamic(
+  () => import("@/components/DarkModeToggle"),
+  { ssr: false }
+);
+
+const AmbientPlayer = dynamic(
+  () => import("@/components/AmbientPlayer"),
+  { ssr: false }
+);
+
 const ADSENSE_CLIENT = "ca-pub-3631011011308556";
 
 export default function App({ Component, pageProps }) {
-  const router = useRouter();
-
   const [showControls, setShowControls] = useState(false);
   const [ambientMood, setAmbientMood] = useState("warm");
 
@@ -23,7 +32,9 @@ export default function App({ Component, pageProps }) {
     setShowControls(true);
 
     const root = document.documentElement;
-    const isDark = localStorage.getItem("theme") === "dark";
+
+    const isDark =
+      localStorage.getItem("theme") === "dark";
 
     if (isDark) {
       root.classList.add("dark");
@@ -34,6 +45,7 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+
       {/* =========================
           GOOGLE ANALYTICS
       ========================== */}
@@ -61,9 +73,6 @@ export default function App({ Component, pageProps }) {
 
       {/* =========================
           GOOGLE ADSENSE
-          
-          Loaded lazily so advertising
-          does not block the initial page.
       ========================== */}
 
       <Script
@@ -73,10 +82,6 @@ export default function App({ Component, pageProps }) {
         src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
         crossOrigin="anonymous"
       />
-
-      {/* =========================
-          GOOGLE VERIFICATION
-      ========================== */}
 
       <Head>
         <meta
@@ -90,16 +95,10 @@ export default function App({ Component, pageProps }) {
         />
       </Head>
 
-      {/* =========================
-          AMBIENT BACKGROUND
-      ========================== */}
-
+      {/* Ambient background */}
       <div className="aura" />
 
-      {/* =========================
-          TOAST NOTIFICATIONS
-      ========================== */}
-
+      {/* Toast notifications */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -113,52 +112,25 @@ export default function App({ Component, pageProps }) {
         }}
       />
 
-      {/* =========================
-          FLOATING CONTROLS
-      ========================== */}
-
+      {/* Non-critical floating controls */}
       {showControls && (
         <>
           <DarkModeToggle />
-
           <AmbientPlayer mood={ambientMood} />
         </>
       )}
 
-      {/* =========================
-          MAIN APPLICATION
-      ========================== */}
-
       <Layout>
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={router.route}
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            exit={{
-              opacity: 0,
-              y: -10,
-            }}
-            transition={{
-              duration: 0.3,
-            }}
-            className="min-h-screen"
-          >
-            <Component
-              {...pageProps}
-              setAmbientMood={setAmbientMood}
-            />
-          </motion.main>
-        </AnimatePresence>
+        <main className="min-h-screen page-enter">
+          <Component
+            {...pageProps}
+            setAmbientMood={setAmbientMood}
+          />
+        </main>
 
         <Analytics />
       </Layout>
+
     </AuthProvider>
   );
 }
